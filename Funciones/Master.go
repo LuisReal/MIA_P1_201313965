@@ -135,6 +135,30 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 		return
 	}
 
+	// validar unit sea igual a b/k/m
+	if unit != "b" && unit != "k" && unit != "m" {
+		fmt.Println("Error: Unit must be b, k or m")
+		return
+	}
+
+	// Configurar el size en bytes
+
+	if unit == "k" {
+		size = size * 1024
+	} else if unit == "m" {
+		size = size * 1024 * 1024
+	}
+
+	// valida el type puede ser (p=primaria e=extendida l=logica)
+
+	if type_ == " " { // si el usuario no indica el type este sera primaria por defecto
+		type_ = "p"
+		fmt.Println("type sera por defecto p=primaria")
+	} else if type_ != "p" && type_ != "e" && type_ != "l" {
+		fmt.Println("Error: Type must be p, e or l")
+		return
+	}
+
 	var count = 0
 	var gap = int32(0)
 	// Iterate over the partitions
@@ -159,7 +183,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 			TemporalMBR.Mbr_partitions[i].Part_status = true
 
 			copy(TemporalMBR.Mbr_partitions[i].Part_name[:], name)
-			copy(TemporalMBR.Mbr_partitions[i].Part_fit[:], fit)
+			copy(TemporalMBR.Mbr_partitions[i].Part_fit[:], fit) // el fit por defecto tomara el primer ajuste
 			copy(TemporalMBR.Mbr_partitions[i].Part_type[:], type_)
 			TemporalMBR.Mbr_partitions[i].Part_correlative = int32(count + 1)
 			break
