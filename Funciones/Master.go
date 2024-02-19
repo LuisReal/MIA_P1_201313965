@@ -1,14 +1,15 @@
-//Here we have all the functions we need to manipulete and create what we need
-
-package main
+package Funciones
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"time"
 )
 
-func mkdisk(size int, fit string, unit string) {
+//PARA PRIMARIA Y EXTENDIDA SOLO SE VA A USAR EL MBR
+
+func Mkdisk(size int, fit string, unit string, letra string) {
 
 	fmt.Println("***********CREANDO ARCHIVO DSK (FUNCION MKDISK)*************")
 	fmt.Println("Size:", size, " Fit: ", fit, " Unit: ", unit)
@@ -41,13 +42,13 @@ func mkdisk(size int, fit string, unit string) {
 	}
 
 	// Creando el archivo
-	err := crearArchivo("./archivos/A.dsk")
+	err := crearArchivo("./archivos/" + letra + ".dsk")
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// Open bin file
-	file, err := abrirArchivo("./archivos/A.dsk")
+	file, err := abrirArchivo("./archivos/" + letra + ".dsk")
 	if err != nil {
 		return
 	}
@@ -67,12 +68,12 @@ func mkdisk(size int, fit string, unit string) {
 
 }
 
-func crearMBR(size int, fit string) {
+func CrearMBR(size int, fit string, letra string) {
 
 	fmt.Println("***********CREANDO MBR Y ESCRIBIENDO EN EL ARCHIVO BINARIO******************")
 
 	//Abriendo el archivo para usarlo y escribir el MBR
-	file, err := abrirArchivo("./archivos/A.dsk")
+	file, err := abrirArchivo("./archivos/" + letra + ".dsk")
 	if err != nil {
 		return
 	}
@@ -109,5 +110,79 @@ func crearMBR(size int, fit string) {
 	defer file.Close()
 
 	fmt.Println("**************FINALIZANDO CREACION DE MBR*****************")
+
+}
+
+//FUNCION QUE ADMINISTRA LAS PARTICIONES
+
+func Fdisk(size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int) {
+
+	// validando que el tamano sea mayor que cero
+	if size <= 0 {
+		fmt.Println("Error: El tamano(size) debe ser mayor a cero")
+		return
+	}
+
+	//Abriendo el archivo para usarlo y escribir el MBR
+	file, err := abrirArchivo("./archivos/" + driveletter + ".dsk")
+	if err != nil {
+		return
+	}
+
+	var TemporalMBR MBR
+	// Read object from bin file
+	if err := LeerObjeto(file, &TemporalMBR, 0); err != nil {
+		return
+	}
+
+	var count = 0
+	var gap = int32(0)
+	// Iterate over the partitions
+	for i := 0; i < 4; i++ {
+		if TemporalMBR.Mbr_partitions[i].Part_size != 0 {
+			count++
+			gap = TemporalMBR.Mbr_partitions[i].Part_start + TemporalMBR.Mbr_partitions[i].Part_size
+		}
+	}
+
+	for i := 0; i < 4; i++ {
+		if TemporalMBR.Mbr_partitions[i].Part_size == 0 { // si la particion esta vacio
+
+			TemporalMBR.Mbr_partitions[i].Part_size = int32(size)
+
+			if count == 0 {
+				TemporalMBR.Mbr_partitions[i].Part_start = int32(binary.Size(TemporalMBR))
+			} else {
+				TemporalMBR.Mbr_partitions[i].Part_start = gap
+			}
+
+			TemporalMBR.Mbr_partitions[i].Part_status = true
+
+			copy(TemporalMBR.Mbr_partitions[i].Part_name[:], name)
+			copy(TemporalMBR.Mbr_partitions[i].Part_fit[:], fit)
+			copy(TemporalMBR.Mbr_partitions[i].Part_type[:], type_)
+			TemporalMBR.Mbr_partitions[i].Part_correlative = int32(count + 1)
+			break
+
+		}
+	}
+
+	// Sobreescribe el MBR
+	if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+		return
+	}
+
+	var TemporalMBR2 MBR
+
+	// Read object from bin file
+	if err := LeerObjeto(file, &TemporalMBR2, 0); err != nil { //Leera el objeto desde la posicion 0
+		return
+	}
+
+	// Print object
+	PrintMBR(TemporalMBR2)
+
+	// Close bin file
+	defer file.Close()
 
 }

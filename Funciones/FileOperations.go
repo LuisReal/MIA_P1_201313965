@@ -1,4 +1,4 @@
-package main
+package Funciones
 
 import (
 	"encoding/binary"
@@ -49,7 +49,6 @@ func escribirObjeto(file *os.File, disk interface{}, position int64) error {
 
 	err := binary.Write(file, binary.LittleEndian, disk)
 
-	fmt.Println("**********ESCRIBIENDO EL ARCHIVO****************")
 	if err != nil {
 		return err
 	}

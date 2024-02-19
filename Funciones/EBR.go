@@ -1,4 +1,4 @@
-package main
+package Funciones
 
 type EBR struct { //extended boot record
 

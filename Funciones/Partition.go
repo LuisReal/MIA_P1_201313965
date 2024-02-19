@@ -1,4 +1,4 @@
-package main
+package Funciones
 
 type Partition struct {
 	Part_status bool // es de tipo bool(indica si la particion esta montada o no)
@@ -9,7 +9,7 @@ type Partition struct {
 
 	Part_start int32 // indica en que byte del disco inicia la particion
 
-	Part_s int32 // contiene el tamano total de la particion en bytes
+	Part_size int32 // contiene el tamano total de la particion en bytes (por defecto es cero)
 
 	Part_name [16]byte // contiene el nombre de la particion
 
