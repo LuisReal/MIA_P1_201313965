@@ -9,7 +9,7 @@ type Partition struct {
 
 	Part_start int32 // indica en que byte del disco inicia la particion
 
-	Part_size int32 // contiene el tamano total de la particion en bytes (por defecto es cero)
+	Part_size int32 //(part_s) contiene el tamano total de la particion en bytes (por defecto es cero)
 
 	Part_name [16]byte // contiene el nombre de la particion
 

@@ -18,7 +18,11 @@ func main() {
 	Funciones.CrearMBR(size, fit, abecedario[contador])
 
 	//size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int
-	Funciones.Fdisk(0, "A", "disco", "B", "P", "B", "FULL", 500)
+	Funciones.Fdisk(10, "A", "Particion1", "b", " ", "bf", "FULL", 500) //(el tamano size sera en unit b= bytes, tipo particion= primaria)
+
+	Funciones.Fdisk(20, "A", "Particion2", "b", "e", "bf", "FULL", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
+
+	Funciones.Fdisk(30, "A", "Particion3", "b", "e", "bf", "FULL", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
 
 	contador++
 

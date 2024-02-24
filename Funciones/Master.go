@@ -170,7 +170,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	}
 
 	for i := 0; i < 4; i++ {
-		if TemporalMBR.Mbr_partitions[i].Part_size == 0 { // si la particion esta vacio
+		if TemporalMBR.Mbr_partitions[i].Part_size == 0 { // si la particion no esta creada(por defecto tiene el part_size tiene valor 0)
 
 			TemporalMBR.Mbr_partitions[i].Part_size = int32(size)
 
@@ -182,9 +182,20 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 			TemporalMBR.Mbr_partitions[i].Part_status = true
 
-			copy(TemporalMBR.Mbr_partitions[i].Part_name[:], name)
-			copy(TemporalMBR.Mbr_partitions[i].Part_fit[:], fit) // el fit por defecto tomara el primer ajuste
-			copy(TemporalMBR.Mbr_partitions[i].Part_type[:], type_)
+			byteString_name := make([]byte, 16)
+			byteString_fit := make([]byte, 1)
+			byteString_type := make([]byte, 1)
+			copy(byteString_name, name)
+			copy(byteString_fit, fit)
+			copy(byteString_type, type_)
+
+			TemporalMBR.Mbr_partitions[i].Part_name = [16]byte(byteString_name)
+			TemporalMBR.Mbr_partitions[i].Part_fit = [1]byte(byteString_fit)
+			TemporalMBR.Mbr_partitions[i].Part_type = [1]byte(byteString_type)
+
+			//copy(TemporalMBR.Mbr_partitions[i].Part_name[:], name)
+			//copy(TemporalMBR.Mbr_partitions[i].Part_fit[:], fit) // el fit por defecto tomara el primer ajuste
+			//copy(TemporalMBR.Mbr_partitions[i].Part_type[:], type_)
 			TemporalMBR.Mbr_partitions[i].Part_correlative = int32(count + 1)
 			break
 

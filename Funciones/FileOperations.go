@@ -46,6 +46,8 @@ func abrirArchivo(name string) (*os.File, error) {
 func escribirObjeto(file *os.File, disk interface{}, position int64) error {
 
 	file.Seek(position, 0)
+	//buf := bytes.NewBuffer([]byte{})
+	//wr := io.MultiWriter(buf, file)
 
 	err := binary.Write(file, binary.LittleEndian, disk)
 
