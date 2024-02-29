@@ -1,5 +1,9 @@
 package Funciones
 
+import (
+	"fmt"
+)
+
 type EBR struct { //extended boot record
 
 	Part_mount bool // indica si la particion esta montada o no
@@ -13,4 +17,11 @@ type EBR struct { //extended boot record
 	Part_next int32 // byte en el que esta el proximo EBR . -1 si no hay siguiente
 
 	Part_name [16]byte // nombre de la particion
+}
+
+func PrintEBR(data EBR) {
+
+	fmt.Printf("mount: %t, fit: %s, start: %d, size: %d, next: %d, name: %s", data.Part_mount, string(data.Part_fit[:]), int(data.Part_start), int(data.Part_s), int(data.Part_next), string(data.Part_name[:]))
+	fmt.Println()
+
 }

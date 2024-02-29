@@ -15,14 +15,24 @@ func main() {
 	abecedario := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
 	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
-	Funciones.CrearMBR(size, fit, abecedario[contador])
+	//Funciones.CrearMBR(size, fit, abecedario[contador])
 
 	//size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int
-	Funciones.Fdisk(10, "A", "Particion1", "b", " ", "bf", "FULL", 500) //(el tamano size sera en unit b= bytes, tipo particion= primaria)
+	Funciones.Fdisk(10, "A", "Particion1", "b", " ", "bf", "", 500) //(el tamano size sera en unit b= bytes, tipo particion= primaria)
 
-	Funciones.Fdisk(20, "A", "Particion2", "b", "e", "bf", "FULL", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
+	Funciones.Fdisk(20, "A", "Particion2", "b", " ", "bf", "", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
 
-	Funciones.Fdisk(30, "A", "Particion3", "b", "e", "bf", "FULL", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
+	Funciones.Fdisk(30, "A", "Particion3", "b", "e", "bf", "", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
+
+	//fdisk -size=1 -type=L -unit=M -fit=bf -driveletter=A -name="Particion3" ejemplo al crear una particion logica
+
+	Funciones.Fdisk(1, "A", "ParticionLogica1", "m", "l", "bf", "", 0)
+
+	//Funciones.Fdisk(0, "A", "Particion3", "", " ", "", "full", 0) elimina una particion ya se rapida o completa
+
+	//fdisk -delete=full -name="Particion1" -driveletter=A
+
+	//Funciones.Fdisk(40, "A", "Particion2", "b", " ", "bf", "full", 500)
 
 	contador++
 
