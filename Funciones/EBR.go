@@ -12,7 +12,7 @@ type EBR struct { //extended boot record
 
 	Part_start int32 // indica en que byte del disco inicia la particion
 
-	Part_s int32 //contiene el tamano total de la particion en bytes
+	Part_size int32 //contiene el tamano total de la particion en bytes
 
 	Part_next int32 // byte en el que esta el proximo EBR . -1 si no hay siguiente
 
@@ -21,7 +21,7 @@ type EBR struct { //extended boot record
 
 func PrintEBR(data EBR) {
 
-	fmt.Printf("mount: %t, fit: %s, start: %d, size: %d, next: %d, name: %s", data.Part_mount, string(data.Part_fit[:]), int(data.Part_start), int(data.Part_s), int(data.Part_next), string(data.Part_name[:]))
+	fmt.Printf("mount: %t, fit: %s, start: %d, size: %d, next: %d, name: %s", data.Part_mount, string(data.Part_fit[:]), int(data.Part_start), int(data.Part_size), int(data.Part_next), string(data.Part_name[:]))
 	fmt.Println()
 
 }

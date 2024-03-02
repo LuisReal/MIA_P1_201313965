@@ -331,7 +331,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 			}
 		}
-	} else if type_ == "l" {
+	} else if type_ == "l" { // AQUI SE CREAN PARTICIONES LOGICAS
 		// si el tipo de particion ingresada es LOGICA
 		var name_bytes [16]byte
 		copy(name_bytes[:], []byte(name))
@@ -354,30 +354,78 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 				start := TemporalMBR.Mbr_partitions[i].Part_start // donde inicia la particion extendida
 
+				//Recupera toda la informacion escrita en el EBR(solo el EBR recupera) en la particion extendida en el archivo binario
 				if err := LeerObjeto(file, &TempEBR2, int64(start)); err != nil {
 					return
 				}
 
-				// se ingresa los datos de la particion logica (El EBR es la particion logica en si porque contiene sus atributos)
-				TempEBR2.Part_start = int32(binary.Size(TempEBR2)) // la primera particion logica se coloca donde termina el primer EBR
-				TempEBR2.Part_name = name_bytes
-				TempEBR2.Part_fit = fit_bytes
-				TempEBR2.Part_mount = false
-				TempEBR2.Part_s = int32(size)
-				TempEBR2.Part_next = TempEBR2.Part_start + int32(size) // donde empieza el siguiente EBR
+				var gap int32
 
-				if err := escribirObjeto(file, TempEBR2, int64(start)); err != nil { //aqui solo escribi el EBR
+				if TempEBR2.Part_size != int32(0) { // Valida si existe una particion logica (en los datos del EBR)
+
+					fmt.Println("\n==========================*****RECUPERANDO Y LEYENDO EL EBR SIGUIENTE*****=================================")
+
+					gap = TempEBR2.Part_next + int32(binary.Size(TempEBR2))
+
+					if err := LeerObjeto(file, &TempEBR2, int64(TempEBR2.Part_next)); err != nil {
+						return
+					}
+
+					TempEBR2.Part_start = gap
+					TempEBR2.Part_size = int32(size)
+					TempEBR2.Part_name = name_bytes
+					TempEBR2.Part_fit = fit_bytes
+					TempEBR2.Part_mount = false
+					TempEBR2.Part_next = TempEBR2.Part_start + int32(size) // donde empieza el siguiente EBR
+
+					if err := escribirObjeto(file, TempEBR2, int64(TempEBR2.Part_start)); err != nil { //aqui solo escribi el EBR
+						return
+					}
+
+					PrintEBR(TempEBR2)
+					fmt.Println("\n==========================*****FINALIZANDO RECUPERACION y LECTURA DEl EBR SIGUIENTE*****=================================")
+
+				} else {
+					TempEBR2.Part_size = int32(size)
+					TempEBR2.Part_start = int32(binary.Size(TempEBR2)) // la primera particion logica se coloca donde termina el primer EBR
+					TempEBR2.Part_name = name_bytes
+					TempEBR2.Part_fit = fit_bytes
+					TempEBR2.Part_mount = false
+					TempEBR2.Part_next = TempEBR2.Part_start + int32(size) // donde empieza el siguiente EBR
+
+					if err := escribirObjeto(file, TempEBR2, int64(start)); err != nil { //aqui solo escribi el EBR
+						return
+					}
+				}
+
+				//ESCRIBIENDO EL SIGUIENTE EBR
+				var TempEBRnext EBR
+
+				if err := escribirObjeto(file, TempEBRnext, int64(TempEBR2.Part_next)); err != nil { //aqui solo escribi el siguiente EBR (con info vacia)
 					return
 				}
 
-				fmt.Println("\n==========================*****LEYENDO EL EBR*****=================================")
-				var TemporalEBR2 EBR
-				if err := LeerObjeto(file, &TemporalEBR2, int64(start)); err != nil {
+				/*
+					fmt.Println("\n==========================*****LEYENDO EL EBR*****=================================")
+					var TemporalEBR2 EBR
+					if err := LeerObjeto(file, &TemporalEBR2, int64(start)); err != nil {
+						return
+					}
+
+					PrintEBR(TemporalEBR2)
+					fmt.Println("\n==========================*****FINALIZANDO LECTURA DEL EBR*****=================================")*/
+
+				//------------------------------AQUI SE LEE EL SIGUENTE EBR---------------------------------------------
+
+				fmt.Println("\n==========================*****LEYENDO EL SIGUIENTE EBR*****=================================")
+
+				var TemporalEBR3 EBR
+				if err := LeerObjeto(file, &TemporalEBR3, int64(TempEBR2.Part_next)); err != nil {
 					return
 				}
 
-				PrintEBR(TemporalEBR2)
-				fmt.Println("\n==========================*****FINALIZANDO LECTURA DEL EBR*****=================================")
+				PrintEBR(TemporalEBR3)
+				fmt.Println("\n==========================*****FINALIZANDO LECTURA DEL SIGUIENTE EBR*****=================================")
 			}
 		}
 	}

@@ -27,6 +27,7 @@ func main() {
 	//fdisk -size=1 -type=L -unit=M -fit=bf -driveletter=A -name="Particion3" ejemplo al crear una particion logica
 
 	Funciones.Fdisk(1, "A", "ParticionLogica1", "m", "l", "bf", "", 0)
+	Funciones.Fdisk(1, "A", "ParticionLogica2", "k", "l", "bf", "", 0)
 
 	//Funciones.Fdisk(0, "A", "Particion3", "", " ", "", "full", 0) elimina una particion ya se rapida o completa
 
