@@ -10,7 +10,7 @@ func main() {
 
 	size := 1
 	fit := "b"
-	unit := "k"
+	unit := "m"
 
 	abecedario := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
@@ -26,8 +26,9 @@ func main() {
 
 	//fdisk -size=1 -type=L -unit=M -fit=bf -driveletter=A -name="Particion3" ejemplo al crear una particion logica
 
-	Funciones.Fdisk(1, "A", "ParticionLogica1", "m", "l", "bf", "", 0)
-	Funciones.Fdisk(1, "A", "ParticionLogica2", "k", "l", "bf", "", 0)
+	Funciones.Fdisk(1, "A", "ParticionLogica1", "k", "l", "bf", "", 0)
+	Funciones.Fdisk(2, "A", "ParticionLogica2", "k", "l", "bf", "", 0)
+	Funciones.Fdisk(1, "A", "ParticionLogica3", "k", "l", "bf", "", 0)
 
 	//Funciones.Fdisk(0, "A", "Particion3", "", " ", "", "full", 0) elimina una particion ya se rapida o completa
 
