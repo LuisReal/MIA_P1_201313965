@@ -22,7 +22,7 @@ func main() {
 
 	Funciones.Fdisk(20, "A", "Particion2", "b", " ", "bf", "", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
 
-	Funciones.Fdisk(30, "A", "Particion3", "b", "e", "bf", "", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
+	Funciones.Fdisk(5, "A", "Particion3", "k", "e", "bf", "", 500) //(el tamano size sera en unit b= bytes,  tipo particion= extendida)
 
 	//fdisk -size=1 -type=L -unit=M -fit=bf -driveletter=A -name="Particion3" ejemplo al crear una particion logica
 

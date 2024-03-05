@@ -347,6 +347,41 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 				start := TemporalMBR.Mbr_partitions[i].Part_start // donde inicia la particion extendida
 
+				inicio := TemporalMBR.Mbr_partitions[i].Part_start
+
+				SumofSize_Logica := int32(0)
+
+				if err := LeerObjeto(file, &TempEBR2, int64(inicio)); err != nil { // empieza desde el primer EBR en la extendida
+					return
+				}
+
+				logica_size := TempEBR2.Part_size
+
+				for logica_size != int32(0) { // Verifica si todavia existe espacio en la particion extendida
+
+					if err := LeerObjeto(file, &TempEBR2, int64(inicio)); err != nil { // empieza desde el primer EBR en la extendida
+						return
+					}
+
+					inicio = TempEBR2.Part_next
+
+					SumofSize_Logica = SumofSize_Logica + int32(binary.Size(TempEBR2)) + TempEBR2.Part_size
+
+					//fmt.Println("\n\n---------------------------EL tamano de SumofSize_Logica es: ", int(SumofSize_Logica))
+
+					logica_size = TempEBR2.Part_size
+
+				}
+
+				size_extendida := TemporalMBR.Mbr_partitions[i].Part_size // tamano de la particion extendida
+
+				if (SumofSize_Logica + int32(size)) > size_extendida {
+					fmt.Println("\n\n***********************NO HAY SUFICIENTE ESPACIO EN LA PARTICION EXTENDIDA****************************")
+					return
+				}
+
+				//fmt.Println("\n\n=============================La suma total de las particiones logicas y EBR es: ", int(SumofSize_Logica))
+
 				//Recupera toda la informacion escrita en el EBR(solo el EBR recupera) en la particion extendida en el archivo binario
 				if err := LeerObjeto(file, &TempEBR2, int64(start)); err != nil {
 					return
@@ -365,7 +400,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 						return
 					}
 					fmt.Println()
-					fmt.Println("================================LEYENDO SOLAMENTE EL OBJETO PRIMER EBR=================================")
+					fmt.Println("================================LEYENDO SOLAMENTE EL PRIMER OBJETO EBR=================================")
 					fmt.Println()
 					var TemporalEBR3 EBR
 					if err := LeerObjeto(file, &TemporalEBR3, int64(start)); err != nil {
@@ -374,7 +409,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 					PrintEBR(TemporalEBR3)
 					fmt.Println()
-					fmt.Println("===========================FINALIZANDO LECTURA SOLAMENTE DEL OBJETO PRIMER EBR=================================")
+					fmt.Println("===========================FINALIZANDO LECTURA SOLAMENTE DEL PRIMER OBJETO EBR=================================")
 					fmt.Println()
 
 					break
@@ -384,9 +419,6 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 				Part_size := TempEBR2.Part_size
 
-				fmt.Println("El Part_size(Tamano Particion Logica) que contiene el primer EBR es: ", Part_size)
-				fmt.Println("El Part_next(Tamano Particion Logica) que contiene el primer EBR es: ", TempEBR2.Part_next)
-
 				for Part_size != int32(0) { // Valida si existe una particion logica (en los datos del EBR)
 
 					gap = TempEBR2.Part_next + int32(binary.Size(TempEBR2))
@@ -395,12 +427,9 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 						return
 					}
 
-					fmt.Println("\nLEYENDO EL EBR ANTES DE ESCRIBIR EL SIGUIENTE")
-					fmt.Println("Name: ", string(TempEBR2.Part_name[:]), " Next: ", TempEBR2.Part_next, " size: ", TempEBR2.Part_size)
-					fmt.Println("FINALIZO LECTURA DEL EBR ANTES DE ESCRIBIR EL SIGUIENTE")
-
 					if TempEBR2.Part_size == int32(0) {
 						fmt.Println("\n==========================*****RECUPERANDO Y LEYENDO EL EBR SIGUIENTE*****=================================")
+						fmt.Println()
 
 						TempEBR2.Part_start = gap
 						TempEBR2.Part_size = int32(size)
@@ -425,25 +454,13 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 				}
 
-				//ESCRIBIENDO EL SIGUIENTE EBR
-
-				fmt.Println("\n==========================*****LEYENDO EL SIGUIENTE EBR QUE ESTA VACIO*****=================================")
+				//ESCRIBIENDO EL SIGUIENTE EBR (VACIO)
 
 				var TempEBRnext EBR
 
 				if err := escribirObjeto(file, TempEBRnext, int64(TempEBR2.Part_next)); err != nil { //aqui solo escribi el siguiente EBR (con info vacia)
 					return
 				}
-
-				//------------------------------AQUI SE LEE EL SIGUENTE EBR VACIO---------------------------------------------
-
-				var TemporalEBR3 EBR
-				if err := LeerObjeto(file, &TemporalEBR3, int64(TempEBR2.Part_next)); err != nil {
-					return
-				}
-
-				PrintEBR(TemporalEBR3)
-				fmt.Println("\n==========================*****FINALIZANDO LECTURA DEL SIGUIENTE EBR VACIO*****=================================")
 
 			}
 
