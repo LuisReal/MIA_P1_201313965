@@ -44,6 +44,8 @@ func main() {
 
 	Funciones.Mount("A", "Particion2")
 
+	Funciones.UnMount("A265")
+
 	//Funciones.Fdisk(0, "A", "Particion3", "", " ", "", "full", 0) elimina una particion ya se rapida o completa
 
 	//fdisk -delete=full -name="Particion1" -driveletter=A

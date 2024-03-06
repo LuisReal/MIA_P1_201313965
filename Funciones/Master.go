@@ -700,3 +700,74 @@ func Mount(driveletter string, name string) {
 	fmt.Println()
 
 }
+
+func UnMount(id string) {
+	fmt.Println("\n        ==================== Iniciando UNMOUNT (DESMONTANDO) ============================")
+	fmt.Println()
+
+	driveletter := id[0]
+	correlativo := id[1]
+	// Open bin file
+	file, err := abrirArchivo("./archivos/" + strings.ToUpper(string(driveletter)) + ".dsk")
+	if err != nil {
+		return
+	}
+
+	var TempMBR MBR
+
+	if err := LeerObjeto(file, &TempMBR, 0); err != nil {
+		return
+	}
+
+	var exist int
+
+	var indice int = 0
+	byteToInt, _ := strconv.Atoi(string(correlativo))
+	// Iterate over the partitions
+	for i := 0; i < 4; i++ {
+		if TempMBR.Mbr_partitions[i].Part_size != int32(0) {
+			fmt.Println("\n************************Recorriendo las Particiones************************")
+
+			if int32(byteToInt) == TempMBR.Mbr_partitions[i].Part_correlative {
+				//// id = DriveLetter + Correlative + 19
+
+				indice = i
+				exist++
+
+				break
+			}
+		}
+	}
+
+	if exist > 0 {
+
+		fmt.Println("\n               -------------------El id de la particion es: ", id)
+
+		var id_bytes [4]byte
+		//copy(id_bytes[:], []byte(id))
+
+		TempMBR.Mbr_partitions[indice].Part_status = false
+		TempMBR.Mbr_partitions[indice].Part_id = id_bytes
+		TempMBR.Mbr_partitions[indice].Part_correlative = 0
+
+		if err := escribirObjeto(file, TempMBR, 0); err != nil {
+			return
+		}
+
+	} else {
+		fmt.Println("\n\n        ****************************La particion NO existe****************************")
+		return
+	}
+
+	var TemporalMBR3 MBR
+	if err := LeerObjeto(file, &TemporalMBR3, 0); err != nil {
+		return
+	}
+	// Print object
+	PrintMBR(TemporalMBR3)
+	defer file.Close()
+
+	fmt.Println("\n        ==================== Finalizando UNMOUNT (DESMONTANDO) ============================")
+	fmt.Println()
+
+}
