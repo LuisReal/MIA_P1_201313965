@@ -1,6 +1,7 @@
 package Funciones
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"math"
@@ -71,6 +72,44 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 	defer file.Close()
 
 	fmt.Println("**********FINALIZO CREACION ARCHIVO EN FUNCION MKDISK****************")
+
+}
+
+func Rmdisk(driveletter string) {
+	// Open bin file
+
+	lector := bufio.NewScanner(os.Stdin)
+
+	entrada := "x"
+
+	for entrada != "y" || entrada != "n" {
+
+		fmt.Println("\nDesea eliminar el disco " + driveletter + "?")
+		fmt.Println("Presione la tecla (y) para continuar y eliminarlo")
+		fmt.Println("Presione la tecla (n) para cancelar")
+
+		lector.Scan()
+
+		input := lector.Text()
+
+		if input == "y" {
+			err := os.Remove("./archivos/" + driveletter + ".dsk")
+			if err != nil {
+				fmt.Println("\n\n****************** El disco a eliminar NO EXISTE **************************")
+				return
+			} else {
+				fmt.Println("\n             Eliminando el disco " + driveletter + " ................")
+			}
+
+			break
+		} else if input == "n" {
+			fmt.Println("\n      Cancelando la eliminacion ..................")
+			break
+		} else {
+			fmt.Println("\n\n                 Ingrese una opcion correcta")
+
+		}
+	}
 
 }
 
@@ -656,10 +695,10 @@ func Mount(driveletter string, name string) {
 
 	for i := 0; i < 4; i++ {
 		if TempMBR.Mbr_partitions[i].Part_size != int32(0) {
-			fmt.Println("\n************************INGRESO ACA************************")
+
 			count++
 			if name_bytes == TempMBR.Mbr_partitions[i].Part_name {
-				//// id = DriveLetter + Correlative + 19
+				//// id = DriveLetter + Correlative + 65
 				indice = i
 				exist++
 
@@ -669,18 +708,25 @@ func Mount(driveletter string, name string) {
 	}
 
 	if exist > 0 {
-		id := strings.ToUpper(driveletter) + strconv.Itoa(count) + "65"
-		fmt.Println("\n               -------------------El id de la particion es: ", id)
 
-		var id_bytes [4]byte
-		copy(id_bytes[:], []byte(id))
+		if TempMBR.Mbr_partitions[indice].Part_status == false {
 
-		TempMBR.Mbr_partitions[indice].Part_id = id_bytes
-		TempMBR.Mbr_partitions[indice].Part_status = true
-		TempMBR.Mbr_partitions[indice].Part_correlative = int32(count)
+			id := strings.ToUpper(driveletter) + strconv.Itoa(count) + "65"
+			fmt.Println("\n               -------------------El id de la particion es: ", id)
 
-		if err := escribirObjeto(file, TempMBR, 0); err != nil {
-			return
+			var id_bytes [4]byte
+			copy(id_bytes[:], []byte(id))
+
+			TempMBR.Mbr_partitions[indice].Part_id = id_bytes
+			TempMBR.Mbr_partitions[indice].Part_status = true
+			TempMBR.Mbr_partitions[indice].Part_correlative = int32(count)
+
+			if err := escribirObjeto(file, TempMBR, 0); err != nil {
+				return
+			}
+		} else {
+			fmt.Println("\n\n*************************La particion ya esta montada por lo que no se puede volver a montar******************")
+			fmt.Println()
 		}
 
 	} else {
@@ -710,6 +756,7 @@ func UnMount(id string) {
 	// Open bin file
 	file, err := abrirArchivo("./archivos/" + strings.ToUpper(string(driveletter)) + ".dsk")
 	if err != nil {
+		fmt.Println("\n\n*************************No existe el disco buscado*******************")
 		return
 	}
 
@@ -741,17 +788,22 @@ func UnMount(id string) {
 
 	if exist > 0 {
 
-		fmt.Println("\n               -------------------El id de la particion es: ", id)
+		if TempMBR.Mbr_partitions[indice].Part_status == true {
+			fmt.Println("\n               -------------------El id de la particion es: ", id)
 
-		var id_bytes [4]byte
-		//copy(id_bytes[:], []byte(id))
+			var id_bytes [4]byte
+			//copy(id_bytes[:], []byte(id))
 
-		TempMBR.Mbr_partitions[indice].Part_status = false
-		TempMBR.Mbr_partitions[indice].Part_id = id_bytes
-		TempMBR.Mbr_partitions[indice].Part_correlative = 0
+			TempMBR.Mbr_partitions[indice].Part_status = false
+			TempMBR.Mbr_partitions[indice].Part_id = id_bytes
+			TempMBR.Mbr_partitions[indice].Part_correlative = 0
 
-		if err := escribirObjeto(file, TempMBR, 0); err != nil {
-			return
+			if err := escribirObjeto(file, TempMBR, 0); err != nil {
+				return
+			}
+		} else {
+			fmt.Println("\n\n*******************La particion NO esta montada por lo tanto no se puede desmontar********************")
+			fmt.Println()
 		}
 
 	} else {
