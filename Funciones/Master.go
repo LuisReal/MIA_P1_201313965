@@ -3,6 +3,7 @@ package Funciones
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"strings"
@@ -162,8 +163,81 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 	if unit == "k" {
 		size = size * 1024
+		add = add * 1024
 	} else if unit == "m" {
 		size = size * 1024 * 1024
+		add = add * 1024 * 1024
+	}
+
+	if add != 0 {
+
+		var name_bytes [16]byte
+
+		copy(name_bytes[:], []byte(name)) // esto convierte de string a []byte y luego a [16]byte
+
+		cont_existPartition := 0
+
+		for i := 0; i < 4; i++ {
+
+			if name_bytes == TemporalMBR.Mbr_partitions[i].Part_name {
+
+				if TemporalMBR.Mbr_partitions[i].Part_size == 0 {
+					fmt.Println("\n************LA PARTICION NO EXISTE***************")
+					fmt.Println()
+					break
+				} else {
+
+					if add > 0 {
+						fmt.Println("\n********************Agregando espacio a la particion: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
+						TemporalMBR.Mbr_partitions[i].Part_size += int32(add)
+					} else {
+
+						if TemporalMBR.Mbr_partitions[i].Part_size < int32(math.Abs(float64(add))) {
+							fmt.Println("\n\nEl tamano de la particion es menor que el espacio a quitar")
+							return
+						} else {
+							fmt.Println("\n********************Quitando espacio a la particion: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
+							TemporalMBR.Mbr_partitions[i].Part_size -= int32(math.Abs(float64(add)))
+						}
+
+					}
+
+					// Sobreescribe el MBR los datos anteriores
+					if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+						return
+					}
+
+					tamano_particion := TemporalMBR.Mbr_partitions[i].Part_size
+
+					fmt.Println("\n\n**************************EL nuevo tamano de la particion es: ", int(tamano_particion))
+					fmt.Println()
+
+				}
+
+				cont_existPartition++
+			}
+
+		}
+
+		if cont_existPartition == 0 {
+			fmt.Println("*************\nLa particion NO existe************")
+			fmt.Println()
+			return
+		}
+
+		var TemporalMBR3 MBR
+		if err := LeerObjeto(file, &TemporalMBR3, 0); err != nil {
+			return
+		}
+		// Print object
+		PrintMBR(TemporalMBR3)
+
+		// Close bin file
+		defer file.Close()
+		fmt.Println("\n\n========================= El ESPACIO de la particion se ha modificado exitosamente =============================")
+		fmt.Println()
+
+		return
 	}
 
 	// valida el type puede ser (p=primaria e=extendida l=logica)
@@ -567,7 +641,7 @@ func formateo_completo(name string, TemporalMBR MBR, file *os.File) {
 				tamano_particion := TemporalMBR.Mbr_partitions[i].Part_size
 
 				for k := 0; k < int(tamano_particion); k++ {
-					if err := escribirObjeto(file, byte(0), int64(TemporalMBR.Mbr_partitions[i].Part_start)); err != nil {
+					if err := escribirObjeto(file, byte(0), int64(int(TemporalMBR.Mbr_partitions[i].Part_start)+k)); err != nil {
 						return
 					}
 				}
