@@ -15,5 +15,5 @@ type Partition struct {
 
 	Part_correlative int32 // contiene el correlativo de la particion
 
-	Part_id int32
+	Part_id [4]byte
 }

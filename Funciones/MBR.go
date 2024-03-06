@@ -22,7 +22,7 @@ func PrintMBR(data MBR) {
 
 	for i := 0; i < 4; i++ {
 
-		fmt.Println(fmt.Sprintf(" Particion: %d, Tipo de Particion:  %s, Tamano de Particion: %d, start: %d ", i, string(data.Mbr_partitions[i].Part_type[:]), int(data.Mbr_partitions[i].Part_size), int(data.Mbr_partitions[i].Part_start)))
+		fmt.Println(fmt.Sprintf(" Particion: %d, Tipo de Particion:  %s, Tamano de Particion: %d, start: %d, id: %s, correlativo: %d, status: %t", i, string(data.Mbr_partitions[i].Part_type[:]), int(data.Mbr_partitions[i].Part_size), int(data.Mbr_partitions[i].Part_start), string(data.Mbr_partitions[i].Part_id[:]), int(data.Mbr_partitions[i].Part_correlative), data.Mbr_partitions[i].Part_status))
 	}
 
 	/*

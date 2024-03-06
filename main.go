@@ -40,7 +40,9 @@ func main() {
 	//Funciones.Fdisk(1, "A", "Particion3", "", "", "", "FULL", 0) // esto eliminara una particion
 
 	//fdisk -add=500 -size=10 -unit=K -driveletter=D -name=”Particion4”
-	Funciones.Fdisk(1, "A", "Particion3", "k", "", "", "", -500)
+	Funciones.Fdisk(1, "A", "Particion3", "k", "", "", "", -5)
+
+	Funciones.Mount("A", "Particion2")
 
 	//Funciones.Fdisk(0, "A", "Particion3", "", " ", "", "full", 0) elimina una particion ya se rapida o completa
 
