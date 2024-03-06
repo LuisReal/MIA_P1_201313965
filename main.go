@@ -15,6 +15,10 @@ func main() {
 	abecedario := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
 	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
+	contador++
+	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
+	contador++
+	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
 	//Funciones.CrearMBR(size, fit, abecedario[contador])
 
 	//size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int
@@ -30,13 +34,15 @@ func main() {
 	Funciones.Fdisk(2, "A", "ParticionLogica2", "k", "l", "bf", "", 0)
 	Funciones.Fdisk(1, "A", "ParticionLogica3", "k", "l", "bf", "", 0)
 
+	//fdisk -delete=full -name="Particion2" -driveletter=A
+
+	Funciones.Fdisk(1, "A", "Particion3", "", "", "", "FULL", 0) // esto eliminara una particion
+
 	//Funciones.Fdisk(0, "A", "Particion3", "", " ", "", "full", 0) elimina una particion ya se rapida o completa
 
 	//fdisk -delete=full -name="Particion1" -driveletter=A
 
 	//Funciones.Fdisk(40, "A", "Particion2", "b", " ", "bf", "full", 500)
-
-	contador++
 
 	//Agregar informacion a un Archivo sin sobreescribir el anterior
 	//file, err:= os.OpenFile("archivo.txt", os.O_APPEND | os.O_CREATE | os.O_WRONLY, 0644)

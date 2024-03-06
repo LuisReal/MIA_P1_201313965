@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -11,7 +13,7 @@ import (
 
 func Mkdisk(size int, fit string, unit string, letra string) {
 
-	fmt.Println("***********CREANDO ARCHIVO DSK (FUNCION MKDISK)*************")
+	fmt.Println("\n\n***********CREANDO ARCHIVO DSK (FUNCION MKDISK)*************")
 	fmt.Println("Size:", size, " Fit: ", fit, " Unit: ", unit)
 
 	// validando que el tamano sea mayor que cero
@@ -101,7 +103,8 @@ func CrearMBR(size int, fit string, letra string) {
 
 	var TempMBR MBR
 	// Leyendo el objeto del archivo binario
-
+	fmt.Println("\n\n================================El tamano del objeto MBR es: ", int32(binary.Size(TempMBR)))
+	fmt.Println()
 	if err := LeerObjeto(file, &TempMBR, 0); err != nil {
 		return
 	}
@@ -120,15 +123,32 @@ func CrearMBR(size int, fit string, letra string) {
 
 func Fdisk(size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int) {
 
-	// validando que el tamano sea mayor que cero
-	if size <= 0 {
-		fmt.Println("Error: El tamano(size) debe ser mayor a cero")
-		return
-	}
-
 	//Abriendo el archivo para usarlo y escribir el MBR
 	file, err := abrirArchivo("./archivos/" + driveletter + ".dsk")
 	if err != nil {
+		return
+	}
+
+	var TemporalMBR MBR
+	// Read object from bin file
+	if err := LeerObjeto(file, &TemporalMBR, 0); err != nil {
+		return
+	}
+
+	//ELimina una particion si recibe un FULL en parametro delete
+
+	delete = strings.ToLower(delete)
+
+	if delete == "full" {
+
+		//formateo_rapido(name, TemporalMBR, file)
+		formateo_completo(name, TemporalMBR, file)
+		return
+	}
+
+	// validando que el tamano sea mayor que cero
+	if size <= 0 {
+		fmt.Println("Error: El tamano(size) debe ser mayor a cero")
 		return
 	}
 
@@ -153,104 +173,6 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 		//fmt.Println("type sera por defecto p=primaria")
 	} else if type_ != "p" && type_ != "e" && type_ != "l" {
 		fmt.Println("Error: Type must be p, e or l")
-		return
-	}
-
-	var TemporalMBR MBR
-	// Read object from bin file
-	if err := LeerObjeto(file, &TemporalMBR, 0); err != nil {
-		return
-	}
-
-	//ELimina una particion si recibe un FULL en parametro delete
-	if delete == "full" {
-
-		var name_bytes [16]byte
-
-		copy(name_bytes[:], []byte(name)) // esto convierte de string a []byte y luego a [16]byte
-
-		cont_existPartition := 0
-
-		for i := 0; i < 4; i++ {
-
-			if name_bytes == TemporalMBR.Mbr_partitions[i].Part_name {
-
-				if TemporalMBR.Mbr_partitions[i].Part_size == 0 {
-					fmt.Println("\n************LA PARTICION NO EXISTE***************")
-					fmt.Println()
-
-				} else {
-					fmt.Println("Eliminando la particion: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
-					fmt.Println("\n         ***********Formateo rapido************")
-
-					TemporalMBR.Mbr_partitions[i].Part_size = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_name = [16]byte([]byte(""))
-					TemporalMBR.Mbr_partitions[i].Part_type = [1]byte([]byte(""))
-					TemporalMBR.Mbr_partitions[i].Part_correlative = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_fit = [1]byte([]byte(""))
-					TemporalMBR.Mbr_partitions[i].Part_id = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_status = false
-					TemporalMBR.Mbr_partitions[i].Part_type = [1]byte([]byte(""))
-
-					//En este espacio va el codigo que llena el espacio con ceros en el archivo
-				}
-			}
-
-		}
-
-		for i := 0; i < 4; i++ {
-			//fmt.Printf("\n************Part_name es: %s ***********\n", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
-			//fmt.Printf("\n************El name ingresado es: %s\n", name)
-
-			//name_bytes = []byte(name)
-
-			if name_bytes == TemporalMBR.Mbr_partitions[i].Part_name {
-
-				fmt.Printf("\n\n*******************************Eliminando la particion: %s...........\n", name)
-
-				start := TemporalMBR.Mbr_partitions[i].Part_start
-
-				//gap := TemporalMBR.Mbr_partitions[i].Part_start + TemporalMBR.Mbr_partitions[i].Part_size
-
-				if err := escribirObjeto(file, byte(0), int64(start)); err != nil { //esto elimina donde empieza la particion y hasta el final del archivo.
-					return
-				}
-				/*
-					if err := escribirObjeto(file, TemporalMBR, int64(gap)); err != nil {
-						return
-					}*/
-
-				/*
-					TemporalMBR.Mbr_partitions[i].Part_correlative = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_fit = [1]byte(byteString_fit)
-					TemporalMBR.Mbr_partitions[i].Part_id = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_name = [16]byte(byteString_name)
-					TemporalMBR.Mbr_partitions[i].Part_size = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_start = int32(0)
-					TemporalMBR.Mbr_partitions[i].Part_status = false
-					TemporalMBR.Mbr_partitions[i].Part_type = [1]byte(byteString_type)*/
-
-			}
-
-			if string(TemporalMBR.Mbr_partitions[i].Part_type[:]) == "e" {
-				fmt.Println("\n**************aumentando el contador cont_existPartition++")
-				cont_existPartition++
-			}
-		}
-
-		if cont_existPartition == 0 {
-			fmt.Println("*************\nLa particion NO existe************")
-			fmt.Println()
-			return
-		}
-
-		var TemporalMBR3 MBR
-		if err := LeerObjeto(file, &TemporalMBR3, 0); err != nil {
-			return
-		}
-		// Print object
-		//PrintMBR(TemporalMBR3)
-		//fmt.Println("\n\nLa particion se ha eliminado con exito")
 		return
 	}
 
@@ -332,6 +254,23 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 			}
 		}
 	} else if type_ == "l" { // AQUI SE CREAN PARTICIONES LOGICAS
+
+		cont_extendida := 0
+
+		//verifica que solo haya una particion extendida (ya que no pueden haber 2 o mas extendidas)
+		for i := 0; i < 4; i++ {
+			if string(TemporalMBR.Mbr_partitions[i].Part_type[:]) == "e" {
+
+				cont_extendida++
+			}
+
+		}
+
+		if cont_extendida == 0 {
+			fmt.Println("\n\n===========================NO hay particion extendida disponible en el disco=================================")
+			fmt.Println()
+			return
+		}
 
 		var name_bytes [16]byte
 		copy(name_bytes[:], []byte(name))
@@ -521,4 +460,140 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	// Close bin file
 	defer file.Close()
 
+}
+
+func formateo_rapido(name string, TemporalMBR MBR, file *os.File) {
+	var nombre_defecto [16]byte //esta variable por defecto contiene lo siguiente [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+	var type_defecto [1]byte
+	var fit_defecto [1]byte
+
+	var name_bytes [16]byte
+
+	copy(name_bytes[:], []byte(name)) // esto convierte de string a []byte y luego a [16]byte
+
+	cont_existPartition := 0
+
+	for i := 0; i < 4; i++ {
+
+		if name_bytes == TemporalMBR.Mbr_partitions[i].Part_name {
+
+			if TemporalMBR.Mbr_partitions[i].Part_size == 0 {
+				fmt.Println("\n************LA PARTICION NO EXISTE***************")
+				fmt.Println()
+				break
+			} else {
+				fmt.Println("\n********************Eliminando la particion: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
+				fmt.Println("\n         ***********Formateo rapido************")
+
+				TemporalMBR.Mbr_partitions[i].Part_size = int32(0)
+				TemporalMBR.Mbr_partitions[i].Part_name = nombre_defecto
+				TemporalMBR.Mbr_partitions[i].Part_type = type_defecto
+				TemporalMBR.Mbr_partitions[i].Part_correlative = int32(0)
+				TemporalMBR.Mbr_partitions[i].Part_fit = fit_defecto
+				TemporalMBR.Mbr_partitions[i].Part_id = int32(0)
+				TemporalMBR.Mbr_partitions[i].Part_status = false
+
+				// Sobreescribe el MBR
+				if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+					return
+				}
+
+			}
+
+			cont_existPartition++
+		}
+
+	}
+
+	if cont_existPartition == 0 {
+		fmt.Println("*************\nLa particion NO existe************")
+		fmt.Println()
+		return
+	}
+
+	var TemporalMBR3 MBR
+	if err := LeerObjeto(file, &TemporalMBR3, 0); err != nil {
+		return
+	}
+	// Print object
+	PrintMBR(TemporalMBR3)
+
+	// Close bin file
+	defer file.Close()
+	fmt.Println("\n\n=========================La particion se ha eliminado con FORMATEO RAPIDO exitosamente=============================")
+	fmt.Println()
+}
+
+func formateo_completo(name string, TemporalMBR MBR, file *os.File) {
+
+	fmt.Println("\n\n===========================Iniciando el formateo Completo=============================")
+
+	var nombre_defecto [16]byte //esta variable por defecto contiene lo siguiente [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+	var type_defecto [1]byte
+	var fit_defecto [1]byte
+
+	var name_bytes [16]byte
+
+	copy(name_bytes[:], []byte(name)) // esto convierte de string a []byte y luego a [16]byte
+
+	cont_existPartition := 0
+
+	for i := 0; i < 4; i++ {
+
+		if name_bytes == TemporalMBR.Mbr_partitions[i].Part_name {
+
+			if TemporalMBR.Mbr_partitions[i].Part_size == 0 {
+				fmt.Println("\n************LA PARTICION NO EXISTE***************")
+				fmt.Println()
+				break
+			} else {
+				fmt.Println("\n********************Eliminando la particion: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
+				fmt.Println("\n===============***********Formateo COMPLETO************==================0")
+
+				TemporalMBR.Mbr_partitions[i].Part_size = int32(0)
+				TemporalMBR.Mbr_partitions[i].Part_name = nombre_defecto
+				TemporalMBR.Mbr_partitions[i].Part_type = type_defecto
+				TemporalMBR.Mbr_partitions[i].Part_correlative = int32(0)
+				TemporalMBR.Mbr_partitions[i].Part_fit = fit_defecto
+				TemporalMBR.Mbr_partitions[i].Part_id = int32(0)
+				TemporalMBR.Mbr_partitions[i].Part_status = false
+
+				// Sobreescribe el MBR los datos anteriores
+				if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+					return
+				}
+
+				// Llena con ceros el espacio que ocupaba la particion
+				tamano_particion := TemporalMBR.Mbr_partitions[i].Part_size
+
+				for k := 0; k < int(tamano_particion); k++ {
+					if err := escribirObjeto(file, byte(0), int64(TemporalMBR.Mbr_partitions[i].Part_start)); err != nil {
+						return
+					}
+				}
+
+			}
+
+			cont_existPartition++
+		}
+
+	}
+
+	if cont_existPartition == 0 {
+		fmt.Println("*************\nLa particion NO existe************")
+		fmt.Println()
+		return
+	}
+
+	var TemporalMBR3 MBR
+	if err := LeerObjeto(file, &TemporalMBR3, 0); err != nil {
+		return
+	}
+	// Print object
+	PrintMBR(TemporalMBR3)
+
+	// Close bin file
+	defer file.Close()
+	fmt.Println("\n\n=========================La particion se ha eliminado por FORMATEO COMPLETO exitosamente=============================")
+	fmt.Println()
 }
