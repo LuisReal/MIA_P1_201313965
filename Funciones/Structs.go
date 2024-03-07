@@ -49,6 +49,10 @@ type Partition struct {
 	Part_id [4]byte
 }
 
+func ImprimirParticion(data Partition) {
+	fmt.Println(fmt.Sprintf("Name: %s, type: %s, start: %d, size: %d, status: %t, id: %s", string(data.Part_name[:]), string(data.Part_type[:]), data.Part_start, data.Part_size, data.Part_status, string(data.Part_id[:])))
+}
+
 type EBR struct { //extended boot record
 
 	Part_mount bool // indica si la particion esta montada o no

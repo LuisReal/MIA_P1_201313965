@@ -1,7 +1,7 @@
 package main
 
 import (
-	Estructuras "MIA_P1_201313965/Funciones"
+	Funciones "MIA_P1_201313965/Funciones"
 )
 
 func main() {
@@ -14,13 +14,13 @@ func main() {
 
 	abecedario := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
-	Estructuras.Mkdisk(size, fit, unit, abecedario[contador])
+	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
 	contador++
-	Estructuras.Mkdisk(size, fit, unit, abecedario[contador])
+	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
 	contador++
-	Estructuras.Mkdisk(size, fit, unit, abecedario[contador])
+	Funciones.Mkdisk(size, fit, unit, abecedario[contador])
 
-	Estructuras.Rmdisk("a")
+	Funciones.Rmdisk("a")
 
 	//size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int
 
