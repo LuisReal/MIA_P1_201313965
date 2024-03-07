@@ -84,7 +84,7 @@ func Rmdisk(driveletter string) {
 
 	for entrada != "y" || entrada != "n" {
 
-		fmt.Println("\nDesea eliminar el disco " + driveletter + "?")
+		fmt.Println("\nDesea eliminar el disco " + strings.ToUpper(driveletter) + "?")
 		fmt.Println("Presione la tecla (y) para continuar y eliminarlo")
 		fmt.Println("Presione la tecla (n) para cancelar")
 
@@ -93,12 +93,12 @@ func Rmdisk(driveletter string) {
 		input := lector.Text()
 
 		if input == "y" {
-			err := os.Remove("./archivos/" + driveletter + ".dsk")
+			err := os.Remove("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
 			if err != nil {
 				fmt.Println("\n\n****************** El disco a eliminar NO EXISTE **************************")
 				return
 			} else {
-				fmt.Println("\n             Eliminando el disco " + driveletter + " ................")
+				fmt.Println("\n             Disco " + strings.ToUpper(driveletter) + " Eliminado Exitosamente ................")
 			}
 
 			break
