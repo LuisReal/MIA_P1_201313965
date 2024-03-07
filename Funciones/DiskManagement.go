@@ -144,7 +144,7 @@ func CrearMBR(size int, fit string, letra string) {
 
 	var TempMBR MBR
 	// Leyendo el objeto del archivo binario
-	fmt.Println("\n\n================================El tamano del objeto MBR es: ", int32(binary.Size(TempMBR)))
+
 	fmt.Println()
 	if err := LeerObjeto(file, &TempMBR, 0); err != nil {
 		return
@@ -796,7 +796,6 @@ func UnMount(id string) {
 
 			TempMBR.Mbr_partitions[indice].Part_status = false
 			TempMBR.Mbr_partitions[indice].Part_id = id_bytes
-			TempMBR.Mbr_partitions[indice].Part_correlative = 0
 
 			if err := escribirObjeto(file, TempMBR, 0); err != nil {
 				return
