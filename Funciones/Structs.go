@@ -96,14 +96,14 @@ type Superblock struct {
 }
 
 type Inode struct {
-	I_uid   int32    //UID del usuario propietario del archivo o carpeta
-	I_gid   int32    //GID del grupo al que pertenece el archivo o carpeta.
-	I_size  int32    //Tamaño del archivo en bytes
-	I_atime [17]byte //Última fecha en que se leyó el inodo sin modificarlo
-	I_ctime [17]byte //Fecha en la que se creó el inodo
-	I_mtime [17]byte //Última fecha en la que se modifica el inodo
-	I_block [15]int32
-	I_type  [1]byte // Indica si es archivo o carpeta. 1 = Archivo, 0 = Carpeta
+	I_uid   int32     //ID del usuario propietario del archivo o carpeta
+	I_gid   int32     //ID del grupo al que pertenece el archivo o carpeta.
+	I_size  int32     //Tamaño del archivo en bytes
+	I_atime [17]byte  //Última fecha en que se leyó el inodo sin modificarlo
+	I_ctime [17]byte  //Fecha en la que se creó el inodo
+	I_mtime [17]byte  //Última fecha en la que se modifica el inodo
+	I_block [15]int32 //Array
+	I_type  [1]byte   // Indica si es archivo o carpeta. 1 = Archivo, 0 = Carpeta
 	I_perm  [3]byte
 }
 
