@@ -55,6 +55,10 @@ func AnalyzeCommnad(command string, params string, contador int) {
 
 	} else if strings.Contains(command, "fdisk") {
 		bn_fdisk(params)
+	} else if strings.Contains(command, "mount") {
+		bn_mount(params)
+	} else if strings.Contains(command, "mkfs") {
+		bn_mkfs(params)
 	}
 }
 
@@ -125,4 +129,68 @@ func bn_fdisk(input string) {
 	//Funciones.Fdisk(10, "A", "Particion1", "b", " ", "bf", "", 0)
 	// Call the function
 	Fdisk(*size, *driveletter, *name, *unit, *type_, *fit, "", 0)
+}
+
+func bn_mount(input string) {
+	// Define flags
+	fs := flag.NewFlagSet("mount", flag.ExitOnError)
+	driveletter := fs.String("driveletter", "", "Letra")
+	name := fs.String("name", "", "Nombre")
+
+	// Parse the flags
+	fs.Parse(os.Args[1:])
+
+	// find the flags in the input
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	// Process the input
+	for _, match := range matches {
+		flagName := match[1]
+		flagValue := strings.ToLower(match[2])
+
+		flagValue = strings.Trim(flagValue, "\"")
+
+		switch flagName {
+		case "driveletter", "name":
+			fs.Set(flagName, flagValue)
+		default:
+			fmt.Println("Error: Flag not found")
+		}
+	}
+
+	// Call the function
+	Mount(*driveletter, *name)
+}
+
+func bn_mkfs(input string) {
+	// Define flags
+	fs := flag.NewFlagSet("mkfs", flag.ExitOnError)
+	id := fs.String("id", "", "Id")
+	type_ := fs.String("type", "", "Tipo")
+	fs_ := fs.String("fs", "2fs", "Fs")
+
+	// Parse the flags
+	fs.Parse(os.Args[1:])
+
+	// find the flags in the input
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	// Process the input
+	for _, match := range matches {
+		flagName := match[1]
+		flagValue := match[2]
+
+		flagValue = strings.Trim(flagValue, "\"")
+
+		switch flagName {
+		case "id", "type", "fs":
+			fs.Set(flagName, flagValue)
+		default:
+			fmt.Println("Error: Flag not found")
+		}
+	}
+
+	// Call the function
+	Mkfs(*id, *type_, *fs_)
+
 }
