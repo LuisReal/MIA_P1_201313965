@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func Login(user string, pass string, id string) {
+func Login(user string, pass string, id string) (string, error) {
 	fmt.Println("\n\n========================= LOGIN ===========================")
 
 	fmt.Printf("\nUser: %s, pass: %s, id: %s\n", user, pass, id)
@@ -17,13 +17,13 @@ func Login(user string, pass string, id string) {
 	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
 	file, err := abrirArchivo(filepath)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	var TempMBR MBR
 	// Read object from bin file
 	if err := LeerObjeto(file, &TempMBR, 0); err != nil {
-		return
+		return "", err
 	}
 
 	// Print object
@@ -42,7 +42,7 @@ func Login(user string, pass string, id string) {
 					index = i
 				} else {
 					fmt.Println("\n*******La particion NO esta montada*****")
-					return
+					return "", err
 				}
 				break
 			}
@@ -54,13 +54,13 @@ func Login(user string, pass string, id string) {
 		fmt.Println()
 	} else {
 		fmt.Println("\n*****Particion NO encontrada******")
-		return
+		return "", err
 	}
 
 	var tempSuperblock Superblock
 
 	if err := LeerObjeto(file, &tempSuperblock, int64(TempMBR.Mbr_partitions[index].Part_start)); err != nil {
-		return
+		return "", err
 	}
 
 	// initSearch /users.txt -> regresa no Inodo
@@ -71,7 +71,7 @@ func Login(user string, pass string, id string) {
 	var crrInode Inode
 
 	if err := LeerObjeto(file, &crrInode, int64(tempSuperblock.S_inode_start+indexInode*int32(binary.Size(Inode{})))); err != nil {
-		return
+		return "", err
 	}
 
 	// getInodeFileData -> Iterate the I_Block n concat the data
@@ -79,7 +79,7 @@ func Login(user string, pass string, id string) {
 	var fileblock Fileblock
 
 	if err := LeerObjeto(file, &fileblock, int64(tempSuperblock.S_block_start+crrInode.I_block[0]*int32(binary.Size(Fileblock{})))); err != nil {
-		return
+		return "", err
 	}
 
 	fmt.Println("Fileblock------------")
@@ -88,16 +88,28 @@ func Login(user string, pass string, id string) {
 
 	lines := strings.Split(data, "\n")
 
-	for _, line := range lines {
-		// Imprimir cada línea
-		fmt.Println(line)
+	datos := strings.Split(lines[1], ",")
 
-	}
+	usuario := datos[3]
+	contrasena := datos[4]
 
 	fmt.Println("Inode", crrInode.I_block)
 
 	// Close bin file
 	defer file.Close()
 
-	fmt.Println("\n\n========================= FIN LOGIN ===========================")
+	if usuario == user && pass == contrasena {
+		fmt.Println("\n **********Usuario encontrado***********")
+
+		fmt.Println("\n\n========================= FIN LOGIN ===========================")
+
+		return usuario, err
+	} else {
+		fmt.Println("\n*********Usuario NO encontrado**********")
+
+		fmt.Println("\n\n========================= FIN LOGIN ===========================")
+
+		return "failed", err
+	}
+
 }

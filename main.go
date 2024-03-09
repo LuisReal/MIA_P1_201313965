@@ -2,6 +2,7 @@ package main
 
 import (
 	Funciones "MIA_P1_201313965/Funciones"
+	"fmt"
 )
 
 func main() {
@@ -44,6 +45,12 @@ func main() {
 
 	//login -user=root -pass=123 -id=A118
 
-	Funciones.Login("root", "123", "A265")
+	usuario, _ := Funciones.Login("root", "123", "A265")
+
+	if usuario == "root" {
+		fmt.Println("\n!!!!!!!!!!!!!!Usuario root encontrado!!!!!!!!!!!!!!!!!!")
+	} else {
+		fmt.Println("\n        El usuario es: ", usuario)
+	}
 
 }
