@@ -26,9 +26,12 @@ func getCommandAndParams(input string) (string, string) {
 
 func Analyze() {
 
-	for {
+	var archivo *os.File
+
+	if len(os.Args) == 1 { // si no se pasa un argumento despues de go run main.go se ejecuta este if
+
 		var input string
-		fmt.Println("Enter command: ")
+		fmt.Print("-> ")
 
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
@@ -38,9 +41,65 @@ func Analyze() {
 
 		fmt.Println("Command: ", command, "Params: ", params)
 
+		//input := bufio.NewScanner(archivo)
+
+		execute := flag.NewFlagSet("execute", flag.ExitOnError)
+		s := execute.String("path", "", "Ruta script")
+
+		// Parse the flags
+		execute.Parse(os.Args[1:])
+
+		// find the flags in the input
+		matches := re.FindAllStringSubmatch(params, -1)
+
+		// Process the input
+		for _, match := range matches {
+
+			flagName := match[1]
+			flagValue := match[2]
+
+			flagValue = strings.Trim(flagValue, "\"")
+
+			switch flagName {
+			case "path":
+				execute.Set(flagName, flagValue)
+			default:
+				fmt.Println("Error: Flag not found")
+			}
+		}
+
+		ruta := *s
+		fmt.Println("\nLa ruta ingresada es: ", ruta)
+		archivo_, err := os.Open(ruta)
+
+		archivo = archivo_
+		if err != nil {
+			fmt.Println("Error al abrir el archivo:", err)
+			return
+		}
+	}
+
+	scanner := bufio.NewScanner(archivo)
+
+	for scanner.Scan() {
+
+		linea := scanner.Text()
+
+		command, params := getCommandAndParams(linea)
+
+		fmt.Println("\nCommand: ", command, "Params: ", params)
+
 		AnalyzeCommnad(command, params, contador)
 
 	}
+
+	//execute -path=/home/darkun/Escritorio/scripts.sdaa
+
+	//mkdisk -size=3000 -unit=K
+	//fdisk -size=300 -driveletter=A -name=Particion1
+	//mount -driveletter=A -name=Part1
+	//mkfile -size=15 -path=/home/user/docs/a.txt -r
+
 }
 
 func AnalyzeCommnad(command string, params string, contador int) {

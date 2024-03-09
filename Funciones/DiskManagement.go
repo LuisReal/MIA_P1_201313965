@@ -16,7 +16,7 @@ import (
 
 func Mkdisk(size int, fit string, unit string, letra string) {
 
-	fmt.Println("\n\n***********CREANDO ARCHIVO DSK (FUNCION MKDISK)*************")
+	fmt.Println("\n\n==================================== Iniciando funcion MKDISK ====================================")
 	fmt.Println("Size:", size, " Fit: ", fit, " Unit: ", unit)
 
 	// validando que el tamano sea mayor que cero
@@ -71,12 +71,13 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 
 	defer file.Close()
 
-	fmt.Println("**********FINALIZO CREACION ARCHIVO EN FUNCION MKDISK****************")
+	fmt.Println("\n\n==================================== Fin de funcion MKDISK ====================================")
 
 }
 
 func Rmdisk(driveletter string) {
 	// Open bin file
+	fmt.Println("\n\n==================================== Iniciando funcion RMDISK ====================================")
 
 	lector := bufio.NewScanner(os.Stdin)
 
@@ -111,11 +112,12 @@ func Rmdisk(driveletter string) {
 		}
 	}
 
+	fmt.Println("\n\n==================================== Fin de funcion RMDISK ====================================")
 }
 
 func CrearMBR(size int, fit string, letra string) {
 
-	fmt.Println("***********CREANDO MBR Y ESCRIBIENDO EN EL ARCHIVO BINARIO******************")
+	fmt.Println("\n\n======================================== Creando MBR  ==========================================")
 
 	//Abriendo el archivo para usarlo y escribir el MBR
 	file, err := abrirArchivo("./archivos/" + letra + ".dsk")
@@ -156,7 +158,7 @@ func CrearMBR(size int, fit string, letra string) {
 	// cerrando el archivo binario
 	defer file.Close()
 
-	fmt.Println("**************FINALIZANDO CREACION DE MBR*****************")
+	fmt.Println("\n\n==================================== Finalizo Creacion de MBR ====================================")
 
 }
 
@@ -164,8 +166,10 @@ func CrearMBR(size int, fit string, letra string) {
 
 func Fdisk(size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int) {
 
+	fmt.Println("\n\n==================================== Iniciando funcion FDISK ====================================")
+
 	//Abriendo el archivo para usarlo y escribir el MBR
-	file, err := abrirArchivo("./archivos/" + driveletter + ".dsk")
+	file, err := abrirArchivo("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
 	if err != nil {
 		return
 	}
@@ -274,7 +278,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 		// Close bin file
 		defer file.Close()
-		fmt.Println("\n\n========================= El ESPACIO de la particion se ha modificado exitosamente =============================")
+		fmt.Println("\n\n********************* El ESPACIO de la particion se ha modificado exitosamente **********************")
 		fmt.Println()
 
 		return
@@ -375,7 +379,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 		}
 
 		if cont_extendida == 0 {
-			fmt.Println("\n\n===========================NO hay particion extendida disponible en el disco=================================")
+			fmt.Println("\n\n************************** NO hay particion extendida disponible en el disco **********************")
 			fmt.Println()
 			return
 		}
@@ -447,7 +451,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 						return
 					}
 					fmt.Println()
-					fmt.Println("================================LEYENDO SOLAMENTE EL PRIMER OBJETO EBR=================================")
+					fmt.Println("***************************** Leyendo solamente el primer OBJETO EBR ***********************************")
 					fmt.Println()
 					var TemporalEBR3 EBR
 					if err := LeerObjeto(file, &TemporalEBR3, int64(start)); err != nil {
@@ -456,7 +460,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 					PrintEBR(TemporalEBR3)
 					fmt.Println()
-					fmt.Println("===========================FINALIZANDO LECTURA SOLAMENTE DEL PRIMER OBJETO EBR=================================")
+					fmt.Println("************************** Finalizando lectura solamente del primer OBJETO EBR *************************")
 					fmt.Println()
 
 					break
@@ -475,7 +479,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 					}
 
 					if TempEBR2.Part_size == int32(0) {
-						fmt.Println("\n==========================*****RECUPERANDO Y LEYENDO EL EBR SIGUIENTE*****=================================")
+						fmt.Println("\n*********************Recuperando y leyendo el EBR siguiente********************************")
 						fmt.Println()
 
 						TempEBR2.Part_start = gap
@@ -491,7 +495,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 						PrintEBR(TempEBR2)
 
-						fmt.Println("\n==========================*****FINALIZANDO RECUPERACION y LECTURA DEl EBR SIGUIENTE*****=================================")
+						fmt.Println("\n***************Finalizando recuperacion y lectura del EBR siguiente************************")
 
 						break
 
@@ -525,16 +529,21 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	}
 
 	fmt.Println()
-	fmt.Println()
+	fmt.Println(" ************** Imprimiendo MBR **************")
 	// Print object
 	PrintMBR(TemporalMBR2)
-
+	fmt.Println(" ************** Fin de Imprimiendo MBR **************")
 	// Close bin file
 	defer file.Close()
+
+	fmt.Println("\n\n==================================== Fin de funcion FDISK ====================================")
 
 }
 
 func formateo_rapido(name string, TemporalMBR MBR, file *os.File) {
+
+	fmt.Println("\n\n==================================== Iniciando funcion Formateo_Rapido ====================================")
+
 	var nombre_defecto [16]byte //esta variable por defecto contiene lo siguiente [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 	var type_defecto [1]byte
 	var fit_defecto [1]byte
@@ -599,7 +608,7 @@ func formateo_rapido(name string, TemporalMBR MBR, file *os.File) {
 
 func formateo_completo(name string, TemporalMBR MBR, file *os.File) {
 
-	fmt.Println("\n\n===========================Iniciando el formateo Completo=============================")
+	fmt.Println("\n\n=========================== Iniciando el formateo Completo =============================")
 
 	var nombre_defecto [16]byte //esta variable por defecto contiene lo siguiente [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 	var type_defecto [1]byte
@@ -672,7 +681,7 @@ func formateo_completo(name string, TemporalMBR MBR, file *os.File) {
 }
 
 func Mount(driveletter string, name string) {
-	fmt.Println("\n        ==================== Iniciando MOUNT ============================")
+	fmt.Println("\n================================= Iniciando MOUNT ======================================")
 	fmt.Println()
 	// Open bin file
 	file, err := abrirArchivo("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
@@ -709,7 +718,7 @@ func Mount(driveletter string, name string) {
 
 	if exist > 0 {
 
-		if TempMBR.Mbr_partitions[indice].Part_status == false {
+		if !TempMBR.Mbr_partitions[indice].Part_status { // (!true) si es false
 
 			id := strings.ToUpper(driveletter) + strconv.Itoa(count) + "65"
 			fmt.Println("\n               -------------------El id de la particion es: ", id)
@@ -742,13 +751,14 @@ func Mount(driveletter string, name string) {
 	PrintMBR(TemporalMBR3)
 	defer file.Close()
 
-	fmt.Println("\n        ==================== Finalizando MOUNT ============================")
+	fmt.Println("\n================================= Finalizando MOUNT ======================================")
 	fmt.Println()
 
 }
 
 func UnMount(id string) {
-	fmt.Println("\n        ==================== Iniciando UNMOUNT (DESMONTANDO) ============================")
+	fmt.Println("\n================================= Iniciando UNMOUNT ======================================")
+
 	fmt.Println()
 
 	driveletter := id[0]
@@ -788,7 +798,7 @@ func UnMount(id string) {
 
 	if exist > 0 {
 
-		if TempMBR.Mbr_partitions[indice].Part_status == true {
+		if TempMBR.Mbr_partitions[indice].Part_status { // si es true
 			fmt.Println("\n               -------------------El id de la particion es: ", id)
 
 			var id_bytes [4]byte
@@ -818,7 +828,8 @@ func UnMount(id string) {
 	PrintMBR(TemporalMBR3)
 	defer file.Close()
 
-	fmt.Println("\n        ==================== Finalizando UNMOUNT (DESMONTANDO) ============================")
+	fmt.Println("\n================================= Finalizando MOUNT ======================================")
+
 	fmt.Println()
 
 }
