@@ -18,11 +18,13 @@ type MBR struct {
 }
 
 func PrintMBR(data MBR) {
-	fmt.Println(fmt.Sprintf("CreationDate: %s, fit: %s, size: %d", string(data.Mbr_fecha_creacion[:]), string(data.Dsk_fit[:]), data.Mbr_tamano))
+	fmt.Printf("CreationDate: %s, fit: %s, size: %d", string(data.Mbr_fecha_creacion[:]), string(data.Dsk_fit[:]), data.Mbr_tamano)
+	fmt.Println()
 
 	for i := 0; i < 4; i++ {
 
-		fmt.Println(fmt.Sprintf(" Particion: %d, Tipo de Particion:  %s, Tamano de Particion: %d, start: %d, id: %s, correlativo: %d, status: %t", i, string(data.Mbr_partitions[i].Part_type[:]), int(data.Mbr_partitions[i].Part_size), int(data.Mbr_partitions[i].Part_start), string(data.Mbr_partitions[i].Part_id[:]), int(data.Mbr_partitions[i].Part_correlative), data.Mbr_partitions[i].Part_status))
+		fmt.Printf(" Particion: %d, Tipo de Particion:  %s, Tamano de Particion: %d, start: %d, id: %s, correlativo: %d, status: %t", i, string(data.Mbr_partitions[i].Part_type[:]), int(data.Mbr_partitions[i].Part_size), int(data.Mbr_partitions[i].Part_start), string(data.Mbr_partitions[i].Part_id[:]), int(data.Mbr_partitions[i].Part_correlative), data.Mbr_partitions[i].Part_status)
+		fmt.Println()
 	}
 
 	/*
@@ -50,7 +52,8 @@ type Partition struct {
 }
 
 func ImprimirParticion(data Partition) {
-	fmt.Println(fmt.Sprintf("Name: %s, type: %s, start: %d, size: %d, status: %t, id: %s", string(data.Part_name[:]), string(data.Part_type[:]), data.Part_start, data.Part_size, data.Part_status, string(data.Part_id[:])))
+	fmt.Printf("Name: %s, type: %s, start: %d, size: %d, status: %t, id: %s", string(data.Part_name[:]), string(data.Part_type[:]), data.Part_start, data.Part_size, data.Part_status, string(data.Part_id[:]))
+	fmt.Println()
 }
 
 type EBR struct { //extended boot record
@@ -93,6 +96,15 @@ type Superblock struct {
 	S_bm_block_start    int32    //Guardará el inicio del bitmap de bloques
 	S_inode_start       int32    //Guardará el inicio de la tabla de inodos
 	S_block_start       int32    //Guardará el inicio de la tabla de bloques
+}
+
+func PrintSuperblock(data Superblock) {
+
+	fmt.Printf("\nFilesystemType: %d, Inodes_Count: %d, blocks_count: %d, free_blocks_count: %d, free_inodes_count: %d, "+
+		"bm_inode_start: %d, bm_block_start: %d, inode_start: %d, block_start: %d", data.S_filesystem_type, data.S_inodes_count,
+		data.S_blocks_count, int(data.S_free_blocks_count), int(data.S_free_inodes_count), data.S_bm_inode_start, data.S_bm_block_start, data.S_inode_start, data.S_block_start)
+	fmt.Println()
+
 }
 
 type Inode struct {
@@ -147,4 +159,11 @@ type Journaling struct {
 	Size      int32
 	Ultimo    int32
 	Contenido [50]Content_J
+}
+
+func PrintJournaling(data Journaling) {
+
+	fmt.Printf("\nJOURNALING       *Operacion: %s , *Path: %s, Content: %s", string(data.Contenido[0].Operation[:]), string(data.Contenido[0].Path[:]), string(data.Contenido[0].Content[:]))
+	fmt.Println()
+
 }
