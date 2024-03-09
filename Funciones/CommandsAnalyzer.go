@@ -59,6 +59,10 @@ func AnalyzeCommnad(command string, params string, contador int) {
 		bn_mount(params)
 	} else if strings.Contains(command, "mkfs") {
 		bn_mkfs(params)
+	} else if strings.Contains(command, "login") {
+		bn_login(params)
+	} else {
+		fmt.Println("Error: Command not found")
 	}
 }
 
@@ -192,5 +196,38 @@ func bn_mkfs(input string) {
 
 	// Call the function
 	Mkfs(*id, *type_, *fs_)
+
+}
+
+func bn_login(input string) {
+	// Define flags
+	fs := flag.NewFlagSet("login", flag.ExitOnError)
+	user := fs.String("user", "", "Usuario")
+	pass := fs.String("pass", "", "Contraseña")
+	id := fs.String("id", "", "Id")
+
+	// Parse the flags
+	fs.Parse(os.Args[1:])
+
+	// find the flags in the input
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	// Process the input
+	for _, match := range matches {
+		flagName := match[1]
+		flagValue := match[2]
+
+		flagValue = strings.Trim(flagValue, "\"")
+
+		switch flagName {
+		case "user", "pass", "id":
+			fs.Set(flagName, flagValue)
+		default:
+			fmt.Println("Error: Flag not found")
+		}
+	}
+
+	// Call the function
+	Login(*user, *pass, *id)
 
 }
