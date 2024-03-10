@@ -197,9 +197,16 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	Inode1.I_block[0] = 1 // el Inode 1 apunta al bloque 1
 
+	/*var name_bytes [16]byte
+	copy(name_bytes[:], []byte(name))
+	*/
 	data := "1,G,root\n1,U,root,root,123\n"
+
 	var Fileblock1 Fileblock //Bloque 1 -> archivo
-	copy(Fileblock1.B_content[:], data)
+
+	var data_bytes [64]byte
+	copy(data_bytes[:], []byte(data))
+	Fileblock1.B_content = data_bytes
 
 	// Inodo 0 -> Bloque 0 -> Inodo 1 -> Bloque 1
 	// Crear la carpeta raiz /

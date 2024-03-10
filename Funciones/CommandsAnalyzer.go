@@ -9,18 +9,29 @@ import (
 	"strings"
 )
 
+var user_ User
+
 var re = regexp.MustCompile(`-(\w+)=("[^"]+"|\S+)`)
 
 var contador int = 0
 var abecedario = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
 func getCommandAndParams(input string) (string, string) {
-	parts := strings.Fields(input)
-	if len(parts) > 0 {
-		command := strings.ToLower(parts[0])
-		params := strings.Join(parts[1:], " ")
-		return command, params
+
+	if input != " " {
+
+		parts := strings.Fields(input)
+
+		fmt.Println("\nImprimiendo parts: ", parts)
+		if len(parts) > 0 {
+
+			command := strings.ToLower(parts[0])
+			params := strings.Join(parts[1:], " ")
+
+			return command, params
+		}
 	}
+
 	return "", input
 }
 
@@ -28,6 +39,7 @@ func Analyze() {
 
 	var archivo *os.File
 
+	//se valida ejecucion de comando execute
 	if len(os.Args) == 1 { // si no se pasa un argumento despues de go run main.go se ejecuta este if
 
 		var input string
@@ -87,9 +99,12 @@ func Analyze() {
 
 		command, params := getCommandAndParams(linea)
 
-		fmt.Println("\nCommand: ", command, "Params: ", params)
+		comentario := command[0] // obtiene solo la primera letra de command
 
-		AnalyzeCommnad(command, params, contador)
+		if string(comentario) != "#" {
+			fmt.Println("\nCommand: ", command, "Params: ", params)
+			AnalyzeCommnad(command, params, contador)
+		}
 
 	}
 
@@ -120,6 +135,10 @@ func AnalyzeCommnad(command string, params string, contador int) {
 		bn_mkfs(params)
 	} else if strings.Contains(command, "login") {
 		bn_login(params)
+	} else if strings.Contains(command, "mkgrp") {
+		bn_mkgrp(params)
+	} else if strings.Contains(command, "logout") {
+		bn_logout()
 	} else {
 		fmt.Println("Error: Command not found")
 	}
@@ -287,6 +306,67 @@ func bn_login(input string) {
 	}
 
 	// Call the function
-	Login(*user, *pass, *id)
+	usuario, err := Login(*user, *pass, *id)
 
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	/*EL usuario root puede ejecutar los siguientes comandos:
+	MKGRP
+	RMGRP
+	MKUSR
+	RMUSR
+	*/
+
+	user_.Nombre = usuario
+	user_.Status = true
+	user_.Id = *id
+}
+
+func bn_logout() {
+	fmt.Println("\n\n ********** Iniciando Logout ************")
+
+	fmt.Println("\n Cerrando sesion de usuario: ", user_.Nombre)
+	user_.Nombre = ""
+	user_.Status = false
+
+	fmt.Println("\n\n ********** Fin de Lougout ************")
+}
+
+func bn_mkgrp(input string) {
+
+	if user_.Nombre == "root" && user_.Status { //si el usuario es root y esta logueado(true)
+		// Define flags
+		fs := flag.NewFlagSet("mkgrp", flag.ExitOnError)
+		name := fs.String("name", "", "nombre de grupo")
+
+		// Parse the flags
+		fs.Parse(os.Args[1:])
+
+		// find the flags in the input
+		matches := re.FindAllStringSubmatch(input, -1)
+
+		// Process the input
+		for _, match := range matches {
+			flagName := match[1]
+			flagValue := match[2]
+
+			flagValue = strings.Trim(flagValue, "\"")
+
+			switch flagName {
+			case "name":
+				fs.Set(flagName, flagValue)
+			default:
+				fmt.Println("Error: Flag not found")
+			}
+		}
+
+		if user_.Nombre == "root" && user_.Status {
+			Mkgrp(*name, user_.Id)
+		} else {
+			fmt.Println("\n\n******************Necesita iniciar sesion como ususario ROOT***********************")
+		}
+
+	}
 }

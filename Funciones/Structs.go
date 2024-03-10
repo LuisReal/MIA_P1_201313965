@@ -4,6 +4,14 @@ import (
 	"fmt"
 )
 
+type User struct {
+	Id              string
+	Nombre          string
+	Status          bool      // (por defecto es false) indica true si el usuario esta logueado
+	Fileblock       Fileblock // contiene data := "1,G,root\n1,U,root,root,123\n"
+	Fileblock_start int32
+}
+
 type MBR struct {
 	Mbr_tamano int32
 
