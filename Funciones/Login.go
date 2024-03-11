@@ -128,6 +128,8 @@ func Mkgrp(name string, id string) {
 	//return file, fileblock, fileblock_start, nil
 	file, fileblock, start_fileblock, err := getUsersTXT(id)
 
+	var newFileblock Fileblock
+
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -142,6 +144,7 @@ func Mkgrp(name string, id string) {
 	var cadena string = " "
 
 	cadena = string(fileblock.B_content[:])
+
 	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
 
 	/*
@@ -152,18 +155,16 @@ func Mkgrp(name string, id string) {
 
 	//cadena := "1,G,root\n1,U,root,root,123\n"
 
-	newCadena := cadena[:len(cadena)-1]
+	lines := strings.Split(cadena, "\n")
 
-	fmt.Println("\nLa nueva cadena es: ", newCadena)
-	fmt.Println("\nEl ultimo caracter de nueva cadena es: ", newCadena[len(newCadena)-1])
+	if len(lines) > 0 {
+		lines = lines[:len(lines)-1]
+	}
 
-	lines := strings.Split(newCadena, "\n")
 	fmt.Println("\n\nContenido del arreglo lines: ", lines)
 	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
-	fmt.Println("\nImprimiendo posicion 0: ", lines[0])
-	fmt.Println("\nImprimiendo posicion 1: ", lines[1])
-	fmt.Println("\nImprimiendo posicion 2: ", lines[2])
-	fmt.Println("\nImprimiendo penultimo elemento de arreglo lines: ", lines[len(lines)-2])
+
+	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
 	//2, G, usuarios, \n
 	var contador int = 0
 	var exist int = 0
@@ -173,15 +174,11 @@ func Mkgrp(name string, id string) {
 
 		datos = strings.Split(lines[i], ",")
 
-		//fmt.Println("\n Imprimiendo array de datos: ", datos)
-		//fmt.Println("\n EL tamano del arreglo datos es: ", len(datos))
 		contador_, _ := strconv.Atoi(datos[0])
 
 		contador = contador_
 		contador++
-		//fmt.Println("\n el valor de contador es: ", contador)
 
-		//fmt.Println("\n EL tamano del arreglo de datos es: ", len(datos))
 		if len(datos) != 0 {
 
 			if string(datos[2]) == name {
@@ -197,17 +194,67 @@ func Mkgrp(name string, id string) {
 	}
 
 	if exist == 0 {
-		cadena += strconv.Itoa(contador) + ",G," + name + "\n"
-		fmt.Println("\n ********datos de la variable content: ", cadena)
 
-		copy(fileblock.B_content[:], cadena)
+		/*data := "1,U,root,dracker"
+		  //usuario := "2,U,user,dracker"
+		  var fileblock [64]byte
+		  copy(fileblock[:], []byte(data))
+
+		  cadena :="2,U,usuario"
+		  fmt.Println("la longitud de la cadena es: ", len(cadena))
+		  //Data := make([]byte,3)
+
+		  //fmt.Println(Data) //output is [0,0,0]
+		  var c int
+		  for i := 0; i < len(fileblock); i++ {
+		      //fmt.Println(fileblock[i])
+
+		      if fileblock[i] ==0 {
+
+		          if c < len(cadena){
+		              fileblock[i] = byte(cadena[c])
+		              fmt.Printf("letra:  %s   ", string(cadena[c]))
+		              c++
+
+		          }else{
+		              break
+		          }
+
+
+		      }
+		  }
+
+		  fmt.Println("\nfileblock: ", string(fileblock[:]))
+		*/
+		cadena += strconv.Itoa(contador) + ",G," + name + "\n"
+		cadena = strings.TrimSpace(cadena)
+
+		fmt.Println("\n ********datos de la variable cadena: ", cadena)
+
+		var cadena_bytes [64]byte
+
+		copy(cadena_bytes[:], []byte(cadena))
+
+		newFileblock.B_content = cadena_bytes
+
+		fmt.Println("\n El contenido de cadena_bytes es: ", string(cadena_bytes[:]))
+		fmt.Println("\n El contenido de B_content es: ", string(newFileblock.B_content[:]))
 
 		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-		if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+		if err := escribirObjeto(file, newFileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
 			return
 		}
 
 	}
+
+	var tempfileblock Fileblock
+
+	fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
+	if err := LeerObjeto(file, &tempfileblock, int64(start_fileblock)); err != nil {
+		return
+	}
+
+	printFileblock(tempfileblock)
 
 	//fmt.Println("\n\nLo que se guardo en fileblock.B_content es: ", string(fileblock.B_content[:]))
 

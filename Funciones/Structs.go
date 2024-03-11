@@ -152,6 +152,14 @@ type Fileblock struct { // bloque de archivos
 	B_content [64]byte
 }
 
+func printFileblock(data Fileblock) {
+
+	fmt.Println("\n***********Imprimiendo contenido de users.txt en fileblock***********")
+	fmt.Println("\nusers.txt: ", string(data.B_content[:]))
+
+	fmt.Println("\n***********Fin de contenido de users.txt en fileblock***********")
+}
+
 type Pointerblock struct { //bloque de apuntadores
 	B_pointers [16]int32
 }
