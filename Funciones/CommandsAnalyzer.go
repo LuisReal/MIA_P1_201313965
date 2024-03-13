@@ -97,13 +97,16 @@ func Analyze() {
 
 		linea := scanner.Text()
 
-		command, params := getCommandAndParams(linea)
+		if linea != "" {
+			command, params := getCommandAndParams(linea)
+			comentario := command[0] // obtiene solo la primera letra de command
 
-		comentario := command[0] // obtiene solo la primera letra de command
-
-		if string(comentario) != "#" {
-			fmt.Println("\nCommand: ", command, "Params: ", params)
-			AnalyzeCommnad(command, params, contador)
+			if string(comentario) != "#" {
+				fmt.Println("\nCommand: ", command, "Params: ", params)
+				AnalyzeCommnad(command, params, contador)
+			}
+		} else {
+			fmt.Println("\nLinea vacia")
 		}
 
 	}
@@ -139,6 +142,8 @@ func AnalyzeCommnad(command string, params string, contador int) {
 		bn_mkgrp(params)
 	} else if strings.Contains(command, "rmgrp") {
 		bn_rmgrp(params)
+	} else if strings.Contains(command, "mkusr") {
+		bn_mkusr(params)
 	} else if strings.Contains(command, "logout") {
 		bn_logout()
 	} else {
@@ -405,6 +410,44 @@ func bn_rmgrp(input string) {
 
 	} else {
 		fmt.Println("\n\n******************Necesita iniciar sesion como ususario ROOT para poder REMOVER un grupo***********************")
+		return
+	}
+}
+
+func bn_mkusr(input string) {
+
+	if user_.Nombre == "root" && user_.Status { //si el usuario es root y esta logueado(true)
+		// Define flags
+		fs := flag.NewFlagSet("mkusr", flag.ExitOnError)
+		user := fs.String("user", "", "nombre de usuario")
+		pass := fs.String("pass", "", "contrasena de usuario")
+		group := fs.String("grp", "", "grupo al que pertenecera el usuario")
+
+		// Parse the flags
+		fs.Parse(os.Args[1:])
+
+		// find the flags in the input
+		matches := re.FindAllStringSubmatch(input, -1)
+
+		// Process the input
+		for _, match := range matches {
+			flagName := match[1]
+			flagValue := match[2]
+
+			flagValue = strings.Trim(flagValue, "\"")
+
+			switch flagName {
+			case "user", "pass", "grp":
+				fs.Set(flagName, flagValue)
+			default:
+				fmt.Println("Error: Flag not found")
+			}
+		}
+
+		Mkusr(*user, *pass, *group, user_.Id)
+
+	} else {
+		fmt.Println("\n\n******************Necesita iniciar sesion como ususario ROOT para poder crear un usuario ***********************")
 		return
 	}
 }

@@ -251,8 +251,7 @@ func Rmgrp(name string, id string) {
 
 	//return file, fileblock, fileblock_start, nil
 	file, fileblock, start_fileblock, err := getUsersTXT(id)
-	fmt.Println("\nfile: ", file)
-	fmt.Println("\nstart_fileblock: ", start_fileblock)
+
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -313,6 +312,7 @@ func Rmgrp(name string, id string) {
 	}
 
 	newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
+	newCadena += "\n"
 
 	var cadena_bytes [64]byte
 	copy(cadena_bytes[:], []byte(newCadena))
@@ -339,6 +339,153 @@ func Rmgrp(name string, id string) {
 	printFileblock(tempfileblock)
 
 	fmt.Println("\n\n========================= Fin RMGRP ===========================")
+
+}
+
+func Mkusr(user string, pass string, group string, id string) {
+	fmt.Println("\n\n========================= Inicio MKUSR ===========================")
+
+	fmt.Printf("El usuario a crear sera: %s, El password es: %s, el grupo al que pertenecera es: %s, El id es: %s", user, pass, group, id)
+	fmt.Println()
+
+	//return file, fileblock, fileblock_start, nil
+	file, fileblock, start_fileblock, err := getUsersTXT(id)
+
+	fmt.Println("\nstart_fileblock: ", start_fileblock)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	fmt.Println("Fileblock------------")
+	//data := "1,G,root\n1,U,root,root,123\n"
+
+	var cadena string = " "
+
+	cadena = string(fileblock.B_content[:])
+
+	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+
+	lines := strings.Split(cadena, "\n")
+
+	if len(lines) > 0 {
+		lines = lines[:len(lines)-1]
+	}
+
+	fmt.Println("\n\nContenido del arreglo lines: ", lines)
+	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
+
+	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
+	//2, G, usuarios, \n
+	var num_group int = 0
+	var exist int = 0
+	var datos []string
+	//var linea_ int
+
+	for i := 0; i < len(lines); i++ {
+
+		datos = strings.Split(lines[i], ",")
+
+		if len(datos) != 0 {
+
+			if len(datos) > 3 {
+				if string(datos[3]) == user {
+					fmt.Println("\n EL usuario a crear ya existe")
+					return
+				}
+			}
+
+		}
+	}
+
+	for i := 0; i < len(lines); i++ {
+
+		datos = strings.Split(lines[i], ",")
+
+		num_group_, _ := strconv.Atoi(datos[0]) // contiene el numero de grupo
+
+		num_group = num_group_
+
+		if len(datos) != 0 {
+
+			if string(datos[2]) == group {
+
+				//2,U,usuarios,user1,usuario\n
+				if num_group == 0 {
+					fmt.Println("\nEl grupo no existe porque ya fue eliminado anteriormente")
+					return
+				} else {
+					fmt.Println("\n\n      ********** El grupo si existe ************")
+
+					exist++ // verifica que el grupo exista
+
+					break
+				}
+			}
+		}
+
+	}
+
+	if exist != 0 { // si el grupo donde se creara el usuario existe
+
+		newCadena := strconv.Itoa(num_group) + ",U," + group + "," + user + "," + pass + "\n"
+
+		fmt.Println("\n ********datos de la variable newCadena: ", newCadena)
+
+		var contador int
+
+		for i := 0; i < len(fileblock.B_content); i++ {
+			if fileblock.B_content[i] == 0 { //verifica si todavia hay espacio
+				contador++
+			}
+
+		}
+
+		if contador < len(newCadena) {
+			//fmt.Println("\nEl contador es: ", contador)
+			fmt.Println("\nYa no hay suficiente espacio en users.txt que esta en fileblock.B_content")
+			fmt.Println(fileblock)
+			return
+		}
+		//Agregando nuevo usuario a users.txt en fileblock.B_content
+		var c int
+
+		for i := 0; i < len(fileblock.B_content); i++ {
+			//fmt.Println(fileblock[i])
+
+			if fileblock.B_content[i] == 0 { // si hay todavia espacio
+
+				if c < len(newCadena) {
+
+					fileblock.B_content[i] = byte(newCadena[c])
+					//fmt.Printf("agregando letra:  %s   ", string(newCadena[c]))
+					c++
+
+				} else {
+					break
+				}
+
+			}
+		}
+
+		fmt.Println("\n El contenido nuevo de B_content es: ", string(fileblock.B_content[:]))
+
+		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+		if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+			return
+		}
+
+	}
+
+	var tempfileblock Fileblock
+
+	fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
+	if err := LeerObjeto(file, &tempfileblock, int64(start_fileblock)); err != nil {
+		return
+	}
+
+	printFileblock(tempfileblock)
+
+	fmt.Println("\n\n========================= Fin MKUSR ===========================")
 
 }
 
