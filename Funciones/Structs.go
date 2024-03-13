@@ -154,10 +154,8 @@ type Fileblock struct { // bloque de archivos
 
 func printFileblock(data Fileblock) {
 
-	fmt.Println("\n***********Imprimiendo contenido de users.txt en fileblock***********")
 	fmt.Println("\nusers.txt: ", string(data.B_content[:]))
 
-	fmt.Println("\n***********Fin de contenido de users.txt en fileblock***********")
 }
 
 type Pointerblock struct { //bloque de apuntadores
