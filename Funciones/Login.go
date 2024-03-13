@@ -489,6 +489,119 @@ func Mkusr(user string, pass string, group string, id string) {
 
 }
 
+func Rmusr(user string, id string) {
+	fmt.Println("\n\n========================= Inicio RMUSR ===========================")
+
+	fmt.Printf("El usuario a eliminar sera: %s, El id es: %s", user, id)
+	fmt.Println()
+
+	//return file, fileblock, fileblock_start, nil
+	file, fileblock, start_fileblock, err := getUsersTXT(id)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	fmt.Println("Fileblock------------")
+	//data := "1,G,root\n1,U,root,root,123\n"
+
+	var cadena string = " "
+
+	cadena = string(fileblock.B_content[:])
+
+	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+
+	lines := strings.Split(cadena, "\n")
+
+	if len(lines) > 0 { // NO lee el ultimo salto de linea \n
+		lines = lines[:len(lines)-1]
+	}
+
+	fmt.Println("\n\nContenido del arreglo lines: ", lines)
+	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
+
+	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
+
+	//2, G, usuarios, \n
+	var num_group int = 0
+	var exist int = 0
+	var datos []string
+	//var linea_ int
+
+	for i := 0; i < len(lines); i++ {
+
+		datos = strings.Split(lines[i], ",")
+
+		contador_, _ := strconv.Atoi(datos[0]) // contiene el numero de grupo
+
+		num_group = contador_
+
+		if len(datos) != 0 {
+
+			if len(datos) > 3 {
+
+				if string(datos[3]) == user {
+					fmt.Println("\nEL usuario a eliminar si existe")
+
+					if num_group == 0 {
+						fmt.Println("\nEl usuario no existe porque ya fue eliminado anteriormente")
+						return
+					} else {
+						fmt.Println("\n\n      ********** Eliminando usuario " + user + " ************")
+
+						datos[0] = "0"
+						lines[i] = strings.Join(datos, ",")
+
+						fmt.Println("\nImprimiendo la linea: ", lines)
+
+						exist++
+
+						break
+					}
+				}
+			}
+
+		}
+
+	}
+
+	if exist != 0 {
+
+		newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
+		newCadena += "\n"
+
+		var cadena_bytes [64]byte
+		copy(cadena_bytes[:], []byte(newCadena))
+
+		fileblock.B_content = cadena_bytes
+
+		fmt.Println("\nImprimiendo fileblock.B_content con nuevo users.txt: ", string(fileblock.B_content[:]))
+
+		//ESCRIBIENDO FILEBLOCK
+		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+
+		if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+			return
+
+		}
+	} else {
+		fmt.Println("\n°°°°°°°°°°°°°°°°°El usuario no existe°°°°°°°°°°°°°°")
+		return
+	}
+
+	var tempfileblock Fileblock
+
+	fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
+	if err := LeerObjeto(file, &tempfileblock, int64(start_fileblock)); err != nil {
+		return
+	}
+
+	printFileblock(tempfileblock)
+
+	fmt.Println("\n\n========================= Fin RMUSR ===========================")
+
+}
+
 func getUsersTXT(id string) (*os.File, Fileblock, int32, error) {
 
 	driveletter := string(id[0])
