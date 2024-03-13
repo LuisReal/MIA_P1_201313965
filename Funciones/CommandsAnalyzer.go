@@ -137,6 +137,8 @@ func AnalyzeCommnad(command string, params string, contador int) {
 		bn_login(params)
 	} else if strings.Contains(command, "mkgrp") {
 		bn_mkgrp(params)
+	} else if strings.Contains(command, "rmgrp") {
+		bn_rmgrp(params)
 	} else if strings.Contains(command, "logout") {
 		bn_logout()
 	} else {
@@ -330,6 +332,7 @@ func bn_logout() {
 	fmt.Println("\n Cerrando sesion de usuario: ", user_.Nombre)
 	user_.Nombre = ""
 	user_.Status = false
+	user_.Id = ""
 
 	fmt.Println("\n\n ********** Fin de Lougout ************")
 }
@@ -362,11 +365,46 @@ func bn_mkgrp(input string) {
 			}
 		}
 
-		if user_.Nombre == "root" && user_.Status {
-			Mkgrp(*name, user_.Id)
-		} else {
-			fmt.Println("\n\n******************Necesita iniciar sesion como ususario ROOT***********************")
+		Mkgrp(*name, user_.Id)
+
+	} else {
+		fmt.Println("\n\n******************Necesita iniciar sesion como ususario ROOT***********************")
+		return
+	}
+}
+
+func bn_rmgrp(input string) {
+
+	if user_.Nombre == "root" && user_.Status { //si el usuario es root y esta logueado(true)
+		// Define flags
+		fs := flag.NewFlagSet("rmgrp", flag.ExitOnError)
+		name := fs.String("name", "", "nombre de grupo")
+
+		// Parse the flags
+		fs.Parse(os.Args[1:])
+
+		// find the flags in the input
+		matches := re.FindAllStringSubmatch(input, -1)
+
+		// Process the input
+		for _, match := range matches {
+			flagName := match[1]
+			flagValue := match[2]
+
+			flagValue = strings.Trim(flagValue, "\"")
+
+			switch flagName {
+			case "name":
+				fs.Set(flagName, flagValue)
+			default:
+				fmt.Println("Error: Flag not found")
+			}
 		}
 
+		Rmgrp(*name, user_.Id)
+
+	} else {
+		fmt.Println("\n\n******************Necesita iniciar sesion como ususario ROOT para poder REMOVER un grupo***********************")
+		return
 	}
 }

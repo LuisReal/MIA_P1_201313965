@@ -122,7 +122,7 @@ func Login(user string, pass string, id string) (string, error) {
 func Mkgrp(name string, id string) {
 	fmt.Println("\n\n========================= Inicio MKGRP ===========================")
 
-	fmt.Printf("El usuario a crear sera: %s, El id es: %s", name, id)
+	fmt.Printf("El grupo a crear sera: %s, El id es: %s", name, id)
 	fmt.Println()
 
 	//return file, fileblock, fileblock_start, nil
@@ -185,7 +185,23 @@ func Mkgrp(name string, id string) {
 
 		fmt.Println("\n ********datos de la variable newCadena: ", newCadena)
 
+		var contador int
+
+		for i := 0; i < len(fileblock.B_content); i++ {
+			if fileblock.B_content[i] == 0 { //verifica si todavia hay espacio
+				contador++
+			}
+
+		}
+
+		if contador < len(newCadena) {
+			//fmt.Println("\nEl contador es: ", contador)
+			fmt.Println("\nYa no hay suficiente espacio en users.txt que esta en fileblock.B_content")
+			return
+		}
+		//Agregando nuevo grupo a users.txt en fileblock.B_content
 		var c int
+
 		for i := 0; i < len(fileblock.B_content); i++ {
 			//fmt.Println(fileblock[i])
 
@@ -225,6 +241,105 @@ func Mkgrp(name string, id string) {
 	//fmt.Println("\n\nLo que se guardo en fileblock.B_content es: ", string(fileblock.B_content[:]))
 
 	fmt.Println("\n\n========================= Fin MKGRP ===========================")
+}
+
+func Rmgrp(name string, id string) {
+	fmt.Println("\n\n========================= Inicio MKGRP ===========================")
+
+	fmt.Printf("El grupo a crear sera: %s, El id es: %s", name, id)
+	fmt.Println()
+
+	//return file, fileblock, fileblock_start, nil
+	file, fileblock, start_fileblock, err := getUsersTXT(id)
+	fmt.Println("\nfile: ", file)
+	fmt.Println("\nstart_fileblock: ", start_fileblock)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	fmt.Println("Fileblock------------")
+	//data := "1,G,root\n1,U,root,root,123\n"
+
+	var cadena string = " "
+
+	cadena = string(fileblock.B_content[:])
+
+	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+
+	lines := strings.Split(cadena, "\n")
+
+	if len(lines) > 0 {
+		lines = lines[:len(lines)-1]
+	}
+
+	fmt.Println("\n\nContenido del arreglo lines: ", lines)
+	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
+
+	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
+	//2, G, usuarios, \n
+	var num_group int = 0
+	var exist int = 0
+	var datos []string
+	//var linea_ int
+
+	for i := 0; i < len(lines); i++ {
+
+		datos = strings.Split(lines[i], ",")
+
+		contador_, _ := strconv.Atoi(datos[0]) // contiene el numero de grupo
+
+		num_group = contador_
+
+		if len(datos) != 0 {
+
+			if string(datos[2]) == name {
+
+				if num_group == 0 {
+					fmt.Println("\nEl grupo no existe porque ya fue eliminado anteriormente")
+					return
+				} else {
+					fmt.Println("\n\n      ********** Eliminando grupo " + name + " ************")
+
+					datos[0] = "0"
+					lines[i] = strings.Join(datos, ",")
+
+					fmt.Println("\nImprimiendo la linea: ", lines)
+
+					exist++
+				}
+			}
+		}
+
+	}
+
+	newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
+
+	var cadena_bytes [64]byte
+	copy(cadena_bytes[:], []byte(newCadena))
+
+	fileblock.B_content = cadena_bytes
+
+	fmt.Println("\nImprimiendo fileblock.B_content con nuevo users.txt: ", string(fileblock.B_content[:]))
+
+	//ESCRIBIENDO FILEBLOCK
+	fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+
+	if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+		return
+
+	}
+
+	var tempfileblock Fileblock
+
+	fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
+	if err := LeerObjeto(file, &tempfileblock, int64(start_fileblock)); err != nil {
+		return
+	}
+
+	printFileblock(tempfileblock)
+
+	fmt.Println("\n\n========================= Fin RMGRP ===========================")
+
 }
 
 func getUsersTXT(id string) (*os.File, Fileblock, int32, error) {
