@@ -137,7 +137,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 		newInode.I_block[i] = -1 //-1 no han sido utilizados
 	}
 
-	// escribiendo los inodos en el archivo
+	// escribiendo los inodos vacios en el archivo
 
 	for i := int32(0); i < n; i++ {
 		err := escribirObjeto(file, newInode, int64(newSuperblock.S_inode_start+i*int32(binary.Size(Inode{}))))
@@ -146,7 +146,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 		}
 	}
 
-	// escribiendo los bloques en el archivo (los fileblock y folderblock tiene el mismo tamano de 64bytes)
+	// escribiendo los bloques vacios en el archivo (los fileblock y folderblock tiene el mismo tamano de 64bytes)
 
 	var newFileblock Fileblock
 	for i := int32(0); i < 3*n; i++ {
