@@ -164,7 +164,7 @@ func CrearMBR(size int, fit string, letra string) {
 
 //FUNCION QUE ADMINISTRA LAS PARTICIONES
 
-func Fdisk(size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int) {
+func Fdisk(size int, driveletter string, name string, unit string, type_ string, fit string, delete string, add int, formateo string) {
 
 	fmt.Println("\n\n==================================== Iniciando funcion FDISK ====================================")
 
@@ -185,9 +185,15 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	delete = strings.ToLower(delete)
 
 	if delete == "full" {
+		fmt.Println("\n RECIBIENDO delete=full")
+		if formateo == "rapido" {
 
-		//formateo_rapido(name, TemporalMBR, file)
-		formateo_completo(name, TemporalMBR, file)
+			//formateo_rapido(name, TemporalMBR, file)
+			formateo_rapido(name, TemporalMBR, file)
+		} else if formateo == "completo" {
+			formateo_completo(name, TemporalMBR, file)
+		}
+
 		return
 	}
 

@@ -69,7 +69,7 @@ func Login(user string, pass string, id string) (string, error) {
 	// initSearch /users.txt -> regresa no Inodo
 	// initSearch -> 1
 
-	indexInode := int32(1)
+	indexInode := InitSearch("/users.txt", file, tempSuperblock)
 
 	var crrInode Inode
 

@@ -195,22 +195,46 @@ func bn_fdisk(input string) {
 	unit := fs.String("unit", "m", "Unidad")
 	type_ := fs.String("type", "p", "Tipo")
 	fit := fs.String("fit", "f", "Ajuste")
+	delete := fs.String("delete", "", "Elimina particion")
+
+	input_ := strings.Split(input, " ")
+	fmt.Println("\nImprimiendo SLICE input: ", input_)
+	var formateo string
+
+	fmt.Println("\nImprimendo input_[1]: ", input_[1])
+	if input_[0] == "-delete=full" {
+		formateo = "rapido"
+	} else {
+
+		for i := 1; i < len(input_); i++ {
+
+			if input_[i] == "-delete=full" {
+				formateo = "completo"
+				break
+			}
+		}
+
+	}
 
 	// Parse the flags
 	fs.Parse(os.Args[1:])
 
 	// find the flags in the input
 	matches := re.FindAllStringSubmatch(input, -1)
-
+	fmt.Println("\nImprimiendo matches: ", matches)
 	// Process the input
+
 	for _, match := range matches {
 		flagName := match[1]
+
+		//fmt.Println("\nmatch[1]: ", match[1])
+		//fmt.Println("\nmatch[2]: ", match[2])
 		flagValue := strings.ToLower(match[2])
 
 		flagValue = strings.Trim(flagValue, "\"")
 
 		switch flagName {
-		case "size", "fit", "unit", "driveletter", "name", "type":
+		case "size", "fit", "unit", "driveletter", "name", "type", "delete":
 			fs.Set(flagName, flagValue)
 		default:
 			fmt.Println("Error: Flag not found")
@@ -219,7 +243,9 @@ func bn_fdisk(input string) {
 
 	//Funciones.Fdisk(10, "A", "Particion1", "b", " ", "bf", "", 0)
 	// Call the function
-	Fdisk(*size, *driveletter, *name, *unit, *type_, *fit, "", 0)
+
+	fmt.Println("\nImprimiendo valor de formateo: ", formateo)
+	Fdisk(*size, *driveletter, *name, *unit, *type_, *fit, *delete, 0, formateo)
 }
 
 func bn_mount(input string) {
