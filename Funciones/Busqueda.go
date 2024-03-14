@@ -8,6 +8,7 @@ import (
 )
 
 func InitSearch(path string, file *os.File, tempSuperblock Superblock) int32 {
+
 	fmt.Println("======Start INITSEARCH======")
 	fmt.Println("path:", path)
 	// path = "/ruta/nueva"

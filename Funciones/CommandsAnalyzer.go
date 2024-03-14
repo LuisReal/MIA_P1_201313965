@@ -148,11 +148,46 @@ func AnalyzeCommnad(command string, params string, contador int) {
 		bn_rmusr(params)
 	} else if strings.Contains(command, "logout") {
 		bn_logout()
+	} else if strings.Contains(command, "rep") {
+		bn_reportes(params)
 	} else {
 		fmt.Println("Error: Command not found")
 	}
 }
 
+func bn_reportes(params string) {
+
+	fs := flag.NewFlagSet("rep", flag.ExitOnError)
+	name := fs.String("name", "", "Name")
+	path := fs.String("path", "f", "Path")
+	id := fs.String("id", "m", "Id")
+	ruta := fs.String("ruta", "m", "ruta")
+
+	// Parse the flags
+	fs.Parse(os.Args[1:])
+
+	// find the flags in the input
+	matches := re.FindAllStringSubmatch(params, -1)
+
+	// Process the input
+	for _, match := range matches {
+		flagName := match[1]
+		flagValue := strings.ToLower(match[2])
+
+		flagValue = strings.Trim(flagValue, "\"")
+
+		switch flagName {
+		case "name", "path", "id", "ruta":
+			fs.Set(flagName, flagValue)
+		default:
+			fmt.Println("Error: Flag not found")
+		}
+	}
+
+	// Call the function
+	Reportes(*name, *path, *id, *ruta)
+
+}
 func bn_mkdisk(params string, letra string) {
 	// Define flags
 	fs := flag.NewFlagSet("mkdisk", flag.ExitOnError)

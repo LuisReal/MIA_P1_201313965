@@ -47,13 +47,13 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 	}
 
 	// Creando el archivo
-	err := crearArchivo("./archivos/" + letra + ".dsk")
+	err := CrearArchivo("./archivos/" + letra + ".dsk")
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// Open bin file
-	file, err := abrirArchivo("./archivos/" + letra + ".dsk")
+	file, err := AbrirArchivo("./archivos/" + letra + ".dsk")
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 	//Creando el archivo binario con ceros
 
 	for i := 0; i < size; i++ {
-		err := escribirObjeto(file, byte(0), int64(i))
+		err := EscribirObjeto(file, byte(0), int64(i))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -120,7 +120,7 @@ func CrearMBR(size int, fit string, letra string) {
 	fmt.Println("\n\n======================================== Creando MBR  ==========================================")
 
 	//Abriendo el archivo para usarlo y escribir el MBR
-	file, err := abrirArchivo("./archivos/" + letra + ".dsk")
+	file, err := AbrirArchivo("./archivos/" + letra + ".dsk")
 	if err != nil {
 		return
 	}
@@ -140,7 +140,7 @@ func CrearMBR(size int, fit string, letra string) {
 	mbr.Mbr_fecha_creacion = [16]byte(byteString)
 
 	// Escribiendo el objeto en el archivo binario
-	if err := escribirObjeto(file, mbr, 0); err != nil {
+	if err := EscribirObjeto(file, mbr, 0); err != nil {
 		return
 	}
 
@@ -169,7 +169,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	fmt.Println("\n\n==================================== Iniciando funcion FDISK ====================================")
 
 	//Abriendo el archivo para usarlo y escribir el MBR
-	file, err := abrirArchivo("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
+	file, err := AbrirArchivo("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
 	if err != nil {
 		return
 	}
@@ -253,7 +253,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 					}
 
 					// Sobreescribe el MBR los datos anteriores
-					if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+					if err := EscribirObjeto(file, TemporalMBR, 0); err != nil {
 						return
 					}
 
@@ -350,7 +350,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 				var TempEBR EBR
 				if type_ == "e" { // se crea el primer EBR al crear una extendida
 					fmt.Println("\n\n            -----------------Creando el primer EBR---------------------------")
-					if err := escribirObjeto(file, TempEBR, int64(TemporalMBR.Mbr_partitions[i].Part_start)); err != nil {
+					if err := EscribirObjeto(file, TempEBR, int64(TemporalMBR.Mbr_partitions[i].Part_start)); err != nil {
 						return
 					}
 					fmt.Println("\n           -----------------Finalizo Creacion del primer EBR---------------------------")
@@ -453,7 +453,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 					TempEBR2.Part_mount = false
 					TempEBR2.Part_next = TempEBR2.Part_start + int32(size) // donde empieza el siguiente EBR
 
-					if err := escribirObjeto(file, TempEBR2, int64(start)); err != nil { //aqui solo escribi el primer EBR
+					if err := EscribirObjeto(file, TempEBR2, int64(start)); err != nil { //aqui solo escribi el primer EBR
 						return
 					}
 					fmt.Println()
@@ -495,7 +495,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 						TempEBR2.Part_mount = false
 						TempEBR2.Part_next = TempEBR2.Part_start + int32(size) // donde empieza el siguiente EBR
 
-						if err := escribirObjeto(file, TempEBR2, int64(gap-int32(binary.Size(TempEBR2)))); err != nil { //aqui solo escribi el EBR
+						if err := EscribirObjeto(file, TempEBR2, int64(gap-int32(binary.Size(TempEBR2)))); err != nil { //aqui solo escribi el EBR
 							return
 						}
 
@@ -515,7 +515,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 				var TempEBRnext EBR
 
-				if err := escribirObjeto(file, TempEBRnext, int64(TempEBR2.Part_next)); err != nil { //aqui solo escribi el siguiente EBR (con info vacia)
+				if err := EscribirObjeto(file, TempEBRnext, int64(TempEBR2.Part_next)); err != nil { //aqui solo escribi el siguiente EBR (con info vacia)
 					return
 				}
 
@@ -525,7 +525,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	}
 
 	// Sobreescribe el MBR
-	if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+	if err := EscribirObjeto(file, TemporalMBR, 0); err != nil {
 		return
 	}
 
@@ -582,7 +582,7 @@ func formateo_rapido(name string, TemporalMBR MBR, file *os.File) {
 				TemporalMBR.Mbr_partitions[i].Part_status = false
 
 				// Sobreescribe el MBR
-				if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+				if err := EscribirObjeto(file, TemporalMBR, 0); err != nil {
 					return
 				}
 
@@ -647,7 +647,7 @@ func formateo_completo(name string, TemporalMBR MBR, file *os.File) {
 				TemporalMBR.Mbr_partitions[i].Part_status = false
 
 				// Sobreescribe el MBR los datos anteriores
-				if err := escribirObjeto(file, TemporalMBR, 0); err != nil {
+				if err := EscribirObjeto(file, TemporalMBR, 0); err != nil {
 					return
 				}
 
@@ -655,7 +655,7 @@ func formateo_completo(name string, TemporalMBR MBR, file *os.File) {
 				tamano_particion := TemporalMBR.Mbr_partitions[i].Part_size
 
 				for k := 0; k < int(tamano_particion); k++ {
-					if err := escribirObjeto(file, byte(0), int64(int(TemporalMBR.Mbr_partitions[i].Part_start)+k)); err != nil {
+					if err := EscribirObjeto(file, byte(0), int64(int(TemporalMBR.Mbr_partitions[i].Part_start)+k)); err != nil {
 						return
 					}
 				}
@@ -690,7 +690,7 @@ func Mount(driveletter string, name string) {
 	fmt.Println("\n================================= Iniciando MOUNT ======================================")
 	fmt.Println()
 	// Open bin file
-	file, err := abrirArchivo("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
+	file, err := AbrirArchivo("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
 	if err != nil {
 		return
 	}
@@ -736,7 +736,7 @@ func Mount(driveletter string, name string) {
 			TempMBR.Mbr_partitions[indice].Part_status = true
 			TempMBR.Mbr_partitions[indice].Part_correlative = int32(count)
 
-			if err := escribirObjeto(file, TempMBR, 0); err != nil {
+			if err := EscribirObjeto(file, TempMBR, 0); err != nil {
 				return
 			}
 		} else {
@@ -770,7 +770,7 @@ func UnMount(id string) {
 	driveletter := id[0]
 	correlativo := id[1]
 	// Open bin file
-	file, err := abrirArchivo("./archivos/" + strings.ToUpper(string(driveletter)) + ".dsk")
+	file, err := AbrirArchivo("./archivos/" + strings.ToUpper(string(driveletter)) + ".dsk")
 	if err != nil {
 		fmt.Println("\n\n*************************No existe el disco buscado*******************")
 		return
@@ -813,7 +813,7 @@ func UnMount(id string) {
 			TempMBR.Mbr_partitions[indice].Part_status = false
 			TempMBR.Mbr_partitions[indice].Part_id = id_bytes
 
-			if err := escribirObjeto(file, TempMBR, 0); err != nil {
+			if err := EscribirObjeto(file, TempMBR, 0); err != nil {
 				return
 			}
 		} else {

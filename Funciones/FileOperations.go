@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func crearArchivo(name string) error {
+func CrearArchivo(name string) error {
 
 	//Verifica si el directorio existe
 	dir := filepath.Dir(name)
@@ -31,7 +31,7 @@ func crearArchivo(name string) error {
 	return nil
 }
 
-func abrirArchivo(name string) (*os.File, error) {
+func AbrirArchivo(name string) (*os.File, error) {
 	file, err := os.OpenFile(name, os.O_RDWR, 0644)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func abrirArchivo(name string) (*os.File, error) {
 	return file, nil
 }
 
-func escribirObjeto(file *os.File, disk interface{}, position int64) error {
+func EscribirObjeto(file *os.File, disk interface{}, position int64) error {
 
 	file.Seek(position, 0)
 	//buf := bytes.NewBuffer([]byte{})

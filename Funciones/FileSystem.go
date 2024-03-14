@@ -15,7 +15,7 @@ func Mkfs(id string, type_ string, fs_ string) {
 
 	// Open bin file
 	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
-	file, err := abrirArchivo(filepath)
+	file, err := AbrirArchivo(filepath)
 	if err != nil {
 		return
 	}
@@ -117,7 +117,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// escribiendo ceros en bitmap de inodos
 	for i := int32(0); i < n; i++ {
-		err := escribirObjeto(file, byte(0), int64(newSuperblock.S_bm_inode_start+i))
+		err := EscribirObjeto(file, byte(0), int64(newSuperblock.S_bm_inode_start+i))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -125,7 +125,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// escribiendo ceros en bitmap de bloques
 	for i := int32(0); i < 3*n; i++ {
-		err := escribirObjeto(file, byte(0), int64(newSuperblock.S_bm_block_start+i))
+		err := EscribirObjeto(file, byte(0), int64(newSuperblock.S_bm_block_start+i))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -140,7 +140,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	// escribiendo los inodos vacios en el archivo
 
 	for i := int32(0); i < n; i++ {
-		err := escribirObjeto(file, newInode, int64(newSuperblock.S_inode_start+i*int32(binary.Size(Inode{}))))
+		err := EscribirObjeto(file, newInode, int64(newSuperblock.S_inode_start+i*int32(binary.Size(Inode{}))))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -150,7 +150,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	var newFileblock Fileblock
 	for i := int32(0); i < 3*n; i++ {
-		err := escribirObjeto(file, newFileblock, int64(newSuperblock.S_block_start+i*int32(binary.Size(Fileblock{}))))
+		err := EscribirObjeto(file, newFileblock, int64(newSuperblock.S_block_start+i*int32(binary.Size(Fileblock{}))))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -213,30 +213,30 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	// Crear el archivo users.txt "1,G,root\n1,U,root,root,123\n"
 
 	// escribiendo el superblock
-	err := escribirObjeto(file, newSuperblock, int64(partition.Part_start))
+	err := EscribirObjeto(file, newSuperblock, int64(partition.Part_start))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// escribiendo bitmap inodes con unos
 
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start+1))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start+1))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// escribiendo bitmap blocks con unos
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start+1))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start+1))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -245,23 +245,23 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	fmt.Println("Inode 1:", int64(newSuperblock.S_inode_start+int32(binary.Size(Inode{}))))
 
 	// escribiendo inodes
-	err = escribirObjeto(file, Inode0, int64(newSuperblock.S_inode_start)) //Inode 0
+	err = EscribirObjeto(file, Inode0, int64(newSuperblock.S_inode_start)) //Inode 0
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	err = escribirObjeto(file, Inode1, int64(newSuperblock.S_inode_start+int32(binary.Size(Inode{})))) //Inode 1
+	err = EscribirObjeto(file, Inode1, int64(newSuperblock.S_inode_start+int32(binary.Size(Inode{})))) //Inode 1
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// escribiendo blocks
-	err = escribirObjeto(file, Folderblock0, int64(newSuperblock.S_block_start)) //Bloque 0
+	err = EscribirObjeto(file, Folderblock0, int64(newSuperblock.S_block_start)) //Bloque 0
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	err = escribirObjeto(file, Fileblock1, int64(newSuperblock.S_block_start+int32(binary.Size(Fileblock{})))) //Bloque 1
+	err = EscribirObjeto(file, Fileblock1, int64(newSuperblock.S_block_start+int32(binary.Size(Fileblock{})))) //Bloque 1
 
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -301,7 +301,7 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	journaling.Contenido[0].Path = path
 	journaling.Contenido[0].Content = content
 
-	error_ := escribirObjeto(file, journaling, int64(partition.Part_start+int32(binary.Size(Superblock{}))))
+	error_ := EscribirObjeto(file, journaling, int64(partition.Part_start+int32(binary.Size(Superblock{}))))
 
 	if error_ != nil {
 		fmt.Println("Error: ", error_)
@@ -309,7 +309,7 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// escribiendo ceros en bitmap de inodos
 	for i := int32(0); i < n; i++ {
-		err := escribirObjeto(file, byte(0), int64(newSuperblock.S_bm_inode_start+i))
+		err := EscribirObjeto(file, byte(0), int64(newSuperblock.S_bm_inode_start+i))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -317,7 +317,7 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// escribiendo ceros en bitmap de bloques
 	for i := int32(0); i < 3*n; i++ {
-		err := escribirObjeto(file, byte(0), int64(newSuperblock.S_bm_block_start+i))
+		err := EscribirObjeto(file, byte(0), int64(newSuperblock.S_bm_block_start+i))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -332,7 +332,7 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	// escribiendo los inodos en el archivo
 
 	for i := int32(0); i < n; i++ {
-		err := escribirObjeto(file, newInode, int64(newSuperblock.S_inode_start+i*int32(binary.Size(Inode{}))))
+		err := EscribirObjeto(file, newInode, int64(newSuperblock.S_inode_start+i*int32(binary.Size(Inode{}))))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -342,7 +342,7 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	var newFileblock Fileblock
 	for i := int32(0); i < 3*n; i++ {
-		err := escribirObjeto(file, newFileblock, int64(newSuperblock.S_block_start+i*int32(binary.Size(Fileblock{}))))
+		err := EscribirObjeto(file, newFileblock, int64(newSuperblock.S_block_start+i*int32(binary.Size(Fileblock{}))))
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -398,28 +398,28 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	// Crear el archivo users.txt "1,G,root\n1,U,root,root,123\n"
 
 	// escribiendo el superblock
-	err := escribirObjeto(file, newSuperblock, int64(partition.Part_start))
+	err := EscribirObjeto(file, newSuperblock, int64(partition.Part_start))
 
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 	// escribiendo bitmap inodes con unos
 
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start+1))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_inode_start+1))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// escribiendo bitmap blocks con unos
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
-	err = escribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start+1))
+	err = EscribirObjeto(file, byte(1), int64(newSuperblock.S_bm_block_start+1))
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -428,21 +428,21 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	fmt.Println("\n**********Inode 1 inicia en: ", int64(newSuperblock.S_inode_start+int32(binary.Size(Inode{}))))
 
 	// escribiendo inodes
-	err = escribirObjeto(file, Inode0, int64(newSuperblock.S_inode_start)) //Inode 0
+	err = EscribirObjeto(file, Inode0, int64(newSuperblock.S_inode_start)) //Inode 0
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
-	err = escribirObjeto(file, Inode1, int64(newSuperblock.S_inode_start+int32(binary.Size(Inode{})))) //Inode 1
+	err = EscribirObjeto(file, Inode1, int64(newSuperblock.S_inode_start+int32(binary.Size(Inode{})))) //Inode 1
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	// escribiendo blocks
-	err = escribirObjeto(file, Folderblock0, int64(newSuperblock.S_block_start)) //Bloque 0
+	err = EscribirObjeto(file, Folderblock0, int64(newSuperblock.S_block_start)) //Bloque 0
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
-	err = escribirObjeto(file, Fileblock1, int64(newSuperblock.S_block_start+int32(binary.Size(Fileblock{})))) //Bloque 1
+	err = EscribirObjeto(file, Fileblock1, int64(newSuperblock.S_block_start+int32(binary.Size(Fileblock{})))) //Bloque 1
 
 	if err != nil {
 		fmt.Println("Error: ", err)

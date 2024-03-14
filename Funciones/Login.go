@@ -17,7 +17,7 @@ func Login(user string, pass string, id string) (string, error) {
 
 	// Open bin file
 	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
-	file, err := abrirArchivo(filepath)
+	file, err := AbrirArchivo(filepath)
 	if err != nil {
 		return "", err
 	}
@@ -70,6 +70,8 @@ func Login(user string, pass string, id string) (string, error) {
 	// initSearch -> 1
 
 	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+
+	fmt.Println("\nindexInode el valor que devuelve InitSearch: ", indexInode)
 
 	var crrInode Inode
 
@@ -223,7 +225,7 @@ func Mkgrp(name string, id string) {
 		fmt.Println("\n El contenido nuevo de B_content es: ", string(fileblock.B_content[:]))
 
 		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-		if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+		if err := EscribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
 			return
 		}
 
@@ -324,7 +326,7 @@ func Rmgrp(name string, id string) {
 	//ESCRIBIENDO FILEBLOCK
 	fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
 
-	if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+	if err := EscribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
 		return
 
 	}
@@ -470,7 +472,7 @@ func Mkusr(user string, pass string, group string, id string) {
 		fmt.Println("\n El contenido nuevo de B_content es: ", string(fileblock.B_content[:]))
 
 		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-		if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+		if err := EscribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
 			return
 		}
 
@@ -580,7 +582,7 @@ func Rmusr(user string, id string) {
 		//ESCRIBIENDO FILEBLOCK
 		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
 
-		if err := escribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
+		if err := EscribirObjeto(file, fileblock, int64(start_fileblock)); err != nil { //aqui solo escribi el primer EBR
 			return
 
 		}
@@ -608,7 +610,7 @@ func getUsersTXT(id string) (*os.File, Fileblock, int32, error) {
 
 	// Open bin file
 	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
-	file, err := abrirArchivo(filepath)
+	file, err := AbrirArchivo(filepath)
 	if err != nil {
 		return nil, Fileblock{}, 0, err
 	}
