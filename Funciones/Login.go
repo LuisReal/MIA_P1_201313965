@@ -415,6 +415,8 @@ func Mkusr(user string, pass string, group string, id string) error {
 		return err
 	}
 
+	//data := "1,G,root\n1,U,root,root,123\n"
+
 	CreateNewBlock(file, tempSuperblock, crrInode, user, group, pass)
 
 	/*
