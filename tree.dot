@@ -24,33 +24,33 @@ digraph H {
 						<table  border="0" cellborder="1" cellspacing="0">
 						<tr><td colspan="3" port='0'>Bloque1</td></tr><tr><td port='2'> 1,G,root
 1,U,root,root,123
-2,G,usuarios
-2,U,usuarios,user1,cont</td></tr></table>
+0,G,usuarios
+0,U,usuarios,user1,cont</td></tr></table>
 					>];
 			
 				Bloque2 [
 						label=<
 						<table  border="0" cellborder="1" cellspacing="0">
 						<tr><td colspan="3" port='0'>Bloque2</td></tr><tr><td port='3'>ra1sena
-2,U,usuarios,user2,contra2sena
-2,U,usuarios,user3,contra</td></tr></table>
+0,U,usuarios,user2,contra2sena
+0,U,usuarios,user3,contra</td></tr></table>
 					>];
 			
 				Bloque3 [
 						label=<
 						<table  border="0" cellborder="1" cellspacing="0">
 						<tr><td colspan="3" port='0'>Bloque3</td></tr><tr><td port='4'>3sena
-2,U,usuarios,user4,contra4sena
-0,G,administradores
-0,U,adm</td></tr></table>
+0,U,usuarios,user4,contra4sena
+3,G,administradores
+3,U,adm</td></tr></table>
 					>];
 			
 				Bloque4 [
 						label=<
 						<table  border="0" cellborder="1" cellspacing="0">
 						<tr><td colspan="3" port='0'>Bloque4</td></tr><tr><td port='5'>inistradores,user5,contra5sena
-2,U,usuarios,user6,contra6sena
-0,</td></tr></table>
+0,U,usuarios,user6,contra6sena
+3,</td></tr></table>
 					>];
 			
 				Bloque5 [

@@ -134,7 +134,8 @@ func Mkgrp(name string, id string) error {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := int32(1) // para poder buscar el inodo1
+	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	//indexInode := int32(1) // para poder buscar el inodo1
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
@@ -287,7 +288,8 @@ func Mkusr(user string, pass string, group string, id string) error {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := int32(1)
+	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	//indexInode := int32(1)
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
@@ -337,7 +339,8 @@ func Rmgrp(name string, id string) error {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := int32(1)
+	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	//indexInode := int32(1)
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
@@ -412,7 +415,8 @@ func Rmgrp(name string, id string) error {
 			if string(datos[2]) == name {
 
 				if num_group == 0 {
-					fmt.Println("\nEl grupo no existe porque ya fue eliminado anteriormente")
+					fmt.Println("\n------------ El grupo no existe porque ya fue eliminado anteriormente ------------")
+					fmt.Println("\n\n========================= Fin RMGRP ===========================")
 					return nil
 				} else {
 					fmt.Println("\n\n      ********** Eliminando grupo " + name + " ************")
@@ -479,32 +483,6 @@ func Rmgrp(name string, id string) error {
 
 		}
 	}
-	//Agregando nuevo usuario a users.txt en fileblock.B_content
-
-	/*
-		var cadena_bytes [64]byte
-		copy(cadena_bytes[:], []byte(newCadena))
-
-		fileblock.B_content = cadena_bytes
-
-		fmt.Println("\nImprimiendo fileblock.B_content con nuevo users.txt: ", string(fileblock.B_content[:]))
-
-		//ESCRIBIENDO FILEBLOCK
-		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-
-		if err := EscribirObjeto(file, fileblock, int64(fileblock_start)); err != nil { //aqui solo escribi el primer EBR
-			return err
-
-		}
-
-		var tempfileblock Fileblock
-
-		fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
-		if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
-			return err
-		}
-
-		printFileblock(tempfileblock)*/
 
 	fmt.Println("\n\n========================= Fin RMGRP ===========================")
 
@@ -519,8 +497,12 @@ func Rmusr(user string, id string) error {
 
 	//return file, fileblock, fileblock_start, nil
 	file, tempSuperblock, err := getUsersTXT(id)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
 
-	indexInode := int32(1)
+	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	//indexInode := int32(1)
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
@@ -530,31 +512,43 @@ func Rmusr(user string, id string) error {
 		return err
 	}
 
+	var bloque int
 	var fileblock Fileblock
-	fmt.Println("\n\n Buscando el bloque: ", crrInode.I_block[0])
-	fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{})) // bloque1
+	var cadena string = " "
+	var fileblock_start int32
 
-	if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
-		return err
-	}
+	//Recuperando cadena de todos los bloques de archivos
 
-	if err != nil {
-		fmt.Println("Error: ", err)
+	for i := 0; i < len(crrInode.I_block); i++ { //iterando bloques de inodo1
+
+		if crrInode.I_block[i] != -1 {
+
+			bloque = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
+
+			fileblock_start = tempSuperblock.S_block_start + int32(bloque)*int32(binary.Size(Fileblock{}))
+
+			if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
+				return err
+			}
+
+			cadena += string(fileblock.B_content[:])
+
+		}
 	}
 
 	fmt.Println("Fileblock------------")
 	//data := "1,G,root\n1,U,root,root,123\n"
 
-	var cadena string = " "
-
-	cadena = string(fileblock.B_content[:])
-
-	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+	fmt.Println("\n Imprimiendo cadena de todos los bloques de archivos: ", cadena)
 
 	lines := strings.Split(cadena, "\n")
 
-	if len(lines) > 0 { // NO lee el ultimo salto de linea \n
-		lines = lines[:len(lines)-1]
+	ultimo_elemento := lines[len(lines)-1]
+
+	if ultimo_elemento == "\n" {
+		if len(lines) > 0 {
+			lines = lines[:len(lines)-1]
+		}
 	}
 
 	fmt.Println("\n\nContenido del arreglo lines: ", lines)
@@ -576,7 +570,7 @@ func Rmusr(user string, id string) error {
 
 		num_group = contador_
 
-		if len(datos) != 0 {
+		if len(datos) != 1 {
 
 			if len(datos) > 3 {
 
@@ -584,7 +578,8 @@ func Rmusr(user string, id string) error {
 					fmt.Println("\nEL usuario a eliminar si existe")
 
 					if num_group == 0 {
-						fmt.Println("\nEl usuario no existe porque ya fue eliminado anteriormente")
+						fmt.Println("\n------------- El usuario no existe porque ya fue eliminado anteriormente ----------------")
+						fmt.Println("\n\n========================= Fin RMUSR ===========================")
 						return nil
 					} else {
 						fmt.Println("\n\n      ********** Eliminando usuario " + user + " ************")
@@ -610,19 +605,53 @@ func Rmusr(user string, id string) error {
 		newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
 		newCadena += "\n"
 
-		var cadena_bytes [64]byte
-		copy(cadena_bytes[:], []byte(newCadena))
+		fmt.Println("\nImprimiendo newCadena con el usuario ya eliminado: ", newCadena)
 
-		fileblock.B_content = cadena_bytes
+		//Agregando newCadena con el usuario removido a los bloques de archivos de users.txt
 
-		fmt.Println("\nImprimiendo fileblock.B_content con nuevo users.txt: ", string(fileblock.B_content[:]))
+		var tempfileblock Fileblock
+		var c int
 
-		//ESCRIBIENDO FILEBLOCK
-		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+		var bloque1 int
+		//var index int
+		var fileblock_start1 int32
 
-		if err := EscribirObjeto(file, fileblock, int64(fileblock_start)); err != nil { //aqui solo escribi el primer EBR
-			return err
+		for i := 0; i < len(crrInode.I_block); i++ { //iterando bloques de inodo1
 
+			if crrInode.I_block[i] != -1 {
+
+				bloque1 = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
+				//index = i
+
+				fileblock_start1 = tempSuperblock.S_block_start + int32(bloque1)*int32(binary.Size(Fileblock{}))
+
+				if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start1)); err != nil { //bloque1
+					return err
+				}
+
+				for i := 0; i < len(tempfileblock.B_content); i++ {
+
+					if c < len(newCadena) {
+
+						tempfileblock.B_content[i] = byte(newCadena[c])
+
+						c++
+
+					} else {
+						break
+					}
+
+				}
+
+				fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+				fmt.Println("\n Imprimiendo tempfileblock.B_content que se escribira en el archivo binario\n", string(tempfileblock.B_content[:]))
+
+				if err := EscribirObjeto(file, tempfileblock, int64(fileblock_start1)); err != nil { //aqui solo escribi el primer EBR
+					return err
+
+				}
+
+			}
 		}
 	} else {
 		//SI NO EXISTE EL USUARIO HAY QUE SEGUIR BUSCANDO EN EL SIGUIENTE BLOQUE DE ARCHIVOS
