@@ -130,6 +130,10 @@ func Mkgrp(name string, id string) error {
 	//return file, fileblock, fileblock_start, nil
 	file, tempSuperblock, err := getUsersTXT(id)
 
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
 	indexInode := int32(1) // para poder buscar el inodo1
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
@@ -140,26 +144,52 @@ func Mkgrp(name string, id string) error {
 		return err
 	}
 
+	var bloque int
+	var index int
 	var fileblock Fileblock
-
-	fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{})) // bloque1
-
-	if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
-		return err
-	}
-
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
-
-	fmt.Println("Fileblock------------")
-	//data := "1,G,root\n1,U,root,root,123\n"
-
 	var cadena string = " "
+	var fileblock_start int32
 
-	cadena = string(fileblock.B_content[:])
+	for i := 0; i < len(crrInode.I_block); i++ { //iterando bloques de inodo1
 
-	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+		if crrInode.I_block[i] != -1 {
+
+			bloque = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
+			index = i
+
+			fileblock_start = tempSuperblock.S_block_start + int32(bloque)*int32(binary.Size(Fileblock{}))
+
+			if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
+				return err
+			}
+
+			cadena += string(fileblock.B_content[:])
+		}
+	}
+	fmt.Printf("\nel ultimo bloque creado es: %d, index: %d", bloque, index)
+	fmt.Println()
+
+	/*
+		var fileblock Fileblock
+
+		fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{})) // bloque1
+
+		if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
+			return err
+		}
+
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+
+		fmt.Println("Fileblock------------")
+		//data := "1,G,root\n1,U,root,root,123\n"
+
+		var cadena string = " "
+		cadena = string(fileblock.B_content[:])
+
+		fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+	*/
 
 	lines := strings.Split(cadena, "\n")
 
@@ -264,6 +294,66 @@ func Mkgrp(name string, id string) error {
 
 	return nil
 }
+
+//
+//
+//
+//
+//
+//
+//
+
+func Mkusr(user string, pass string, group string, id string) error {
+
+	fmt.Println("\n\n========================= Inicio MKUSR ===========================")
+
+	fmt.Printf("El usuario a crear sera: %s, El password es: %s, el grupo al que pertenecera es: %s, El id es: %s", user, pass, group, id)
+	fmt.Println()
+
+	//return file, fileblock, fileblock_start, nil
+	file, tempSuperblock, err := getUsersTXT(id)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	indexInode := int32(1)
+
+	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
+
+	var crrInode Inode //inodo que contiene los bloques de archivos de users.txt
+
+	if err := LeerObjeto(file, &crrInode, int64(inode_start)); err != nil { //Inode1
+		return err
+	}
+
+	//data := "1,G,root\n1,U,root,root,123\n"
+
+	CreateNewBlock(file, tempSuperblock, crrInode, user, group, pass)
+
+	/*
+		var tempfileblock Fileblock
+
+		fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
+		if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
+			return err
+		}
+
+		printFileblock(tempfileblock)*/
+
+	fmt.Println("\n\n========================= Fin MKUSR ===========================")
+
+	return nil
+}
+
+//
+//
+//
+//
+//
+//
+//
+//
 
 func Rmgrp(name string, id string) error {
 	fmt.Println("\n\n========================= Inicio MKGRP ===========================")
@@ -382,66 +472,6 @@ func Rmgrp(name string, id string) error {
 
 	return nil
 }
-
-//
-//
-//
-//
-//
-//
-//
-
-func Mkusr(user string, pass string, group string, id string) error {
-
-	fmt.Println("\n\n========================= Inicio MKUSR ===========================")
-
-	fmt.Printf("El usuario a crear sera: %s, El password es: %s, el grupo al que pertenecera es: %s, El id es: %s", user, pass, group, id)
-	fmt.Println()
-
-	//return file, fileblock, fileblock_start, nil
-	file, tempSuperblock, err := getUsersTXT(id)
-
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
-
-	indexInode := int32(1)
-
-	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
-
-	var crrInode Inode //inodo que contiene los bloques de archivos de users.txt
-
-	if err := LeerObjeto(file, &crrInode, int64(inode_start)); err != nil { //Inode1
-		return err
-	}
-
-	//data := "1,G,root\n1,U,root,root,123\n"
-
-	CreateNewBlock(file, tempSuperblock, crrInode, user, group, pass)
-
-	/*
-		var tempfileblock Fileblock
-
-		fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
-		if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
-			return err
-		}
-
-		printFileblock(tempfileblock)*/
-
-	fmt.Println("\n\n========================= Fin MKUSR ===========================")
-
-	return nil
-}
-
-//
-//
-//
-//
-//
-//
-//
-//
 
 func Rmusr(user string, id string) error {
 	fmt.Println("\n\n========================= Inicio RMUSR ===========================")

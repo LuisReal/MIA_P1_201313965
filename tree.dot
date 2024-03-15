@@ -41,21 +41,22 @@ digraph H {
 						<table  border="0" cellborder="1" cellspacing="0">
 						<tr><td colspan="3" port='0'>Bloque3</td></tr><tr><td port='4'>sena
 2,U,usuarios,user4,contra4sena
-2,U,usuarios,user5,contra5se</td></tr></table>
+3,G,administradores
+3,U,admi</td></tr></table>
 					>];
 			
 				Bloque4 [
 						label=<
 						<table  border="0" cellborder="1" cellspacing="0">
-						<tr><td colspan="3" port='0'>Bloque4</td></tr><tr><td port='5'>na
+						<tr><td colspan="3" port='0'>Bloque4</td></tr><tr><td port='5'>nistradores,user5,contra5sena
 2,U,usuarios,user6,contra6sena
-2,U,usuarios,user7,contra7sena</td></tr></table>
+3,U</td></tr></table>
 					>];
 			
 				Bloque5 [
 						label=<
 						<table  border="0" cellborder="1" cellspacing="0">
-						<tr><td colspan="3" port='0'>Bloque5</td></tr><tr><td port='6'>
+						<tr><td colspan="3" port='0'>Bloque5</td></tr><tr><td port='6'>,administradores,user7,contra7sena
 </td></tr></table>
 					>];
 			
