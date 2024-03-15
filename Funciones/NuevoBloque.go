@@ -85,7 +85,7 @@ func CreateNewBlock(file *os.File, tempSuperblock Superblock, crrInode Inode, us
 		fmt.Println("\ndatos: ", datos)
 		fmt.Println("\nLongitud de datos es : ", len(datos))
 
-		if len(datos) != 0 {
+		if len(datos) > 2 {
 
 			if string(datos[2]) == group {
 

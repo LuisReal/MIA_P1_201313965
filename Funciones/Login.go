@@ -169,28 +169,6 @@ func Mkgrp(name string, id string) error {
 	fmt.Printf("\nel ultimo bloque creado es: %d, index: %d", bloque, index)
 	fmt.Println()
 
-	/*
-		var fileblock Fileblock
-
-		fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{})) // bloque1
-
-		if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
-			return err
-		}
-
-		if err != nil {
-			fmt.Println("Error: ", err)
-		}
-
-		fmt.Println("Fileblock------------")
-		//data := "1,G,root\n1,U,root,root,123\n"
-
-		var cadena string = " "
-		cadena = string(fileblock.B_content[:])
-
-		fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
-	*/
-
 	lines := strings.Split(cadena, "\n")
 
 	if len(lines) > 0 {
@@ -295,14 +273,6 @@ func Mkgrp(name string, id string) error {
 	return nil
 }
 
-//
-//
-//
-//
-//
-//
-//
-
 func Mkusr(user string, pass string, group string, id string) error {
 
 	fmt.Println("\n\n========================= Inicio MKUSR ===========================")
@@ -356,13 +326,16 @@ func Mkusr(user string, pass string, group string, id string) error {
 //
 
 func Rmgrp(name string, id string) error {
-	fmt.Println("\n\n========================= Inicio MKGRP ===========================")
+	fmt.Println("\n\n========================= Inicio RMGRP ===========================")
 
-	fmt.Printf("El grupo a crear sera: %s, El id es: %s", name, id)
+	fmt.Printf("El grupo a remover sera: %s, El id es: %s", name, id)
 	fmt.Println()
 
 	//return file, fileblock, fileblock_start, nil
 	file, tempSuperblock, err := getUsersTXT(id)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
 
 	indexInode := int32(1)
 
@@ -374,31 +347,46 @@ func Rmgrp(name string, id string) error {
 		return err
 	}
 
+	var bloque int
+	var index int
 	var fileblock Fileblock
+	var cadena string = " "
+	var fileblock_start int32
 
-	fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{})) // bloque1
+	for i := 0; i < len(crrInode.I_block); i++ { //iterando bloques de inodo1
 
-	if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
-		return err
+		if crrInode.I_block[i] != -1 {
+
+			bloque = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
+			index = i
+
+			fileblock_start = tempSuperblock.S_block_start + int32(bloque)*int32(binary.Size(Fileblock{}))
+
+			if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
+				return err
+			}
+
+			cadena += string(fileblock.B_content[:])
+
+		}
 	}
 
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
+	fmt.Printf("\nel ultimo bloque creado es: %d, index: %d", bloque, index)
+	fmt.Println()
 
 	fmt.Println("Fileblock------------")
 	//data := "1,G,root\n1,U,root,root,123\n"
 
-	var cadena string = " "
-
-	cadena = string(fileblock.B_content[:])
-
-	fmt.Println("\n Imprimiendo cadena: ", string(fileblock.B_content[:]))
+	fmt.Println("\n Imprimiendo cadena: ", cadena)
 
 	lines := strings.Split(cadena, "\n")
 
-	if len(lines) > 0 {
-		lines = lines[:len(lines)-1]
+	ultimo_elemento := lines[len(lines)-1]
+
+	if ultimo_elemento == "\n" {
+		if len(lines) > 0 {
+			lines = lines[:len(lines)-1]
+		}
 	}
 
 	fmt.Println("\n\nContenido del arreglo lines: ", lines)
@@ -419,7 +407,7 @@ func Rmgrp(name string, id string) error {
 
 		num_group = contador_
 
-		if len(datos) != 0 {
+		if len(datos) > 2 {
 
 			if string(datos[2]) == name {
 
@@ -432,7 +420,7 @@ func Rmgrp(name string, id string) error {
 					datos[0] = "0"
 					lines[i] = strings.Join(datos, ",")
 
-					fmt.Println("\nImprimiendo la linea: ", lines)
+					fmt.Println("\nImprimiendo la linea \n", lines)
 
 					exist++
 				}
@@ -443,30 +431,80 @@ func Rmgrp(name string, id string) error {
 
 	newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
 	newCadena += "\n"
+	fmt.Println("\nImprimiendo newCadena: ", newCadena)
 
-	var cadena_bytes [64]byte
-	copy(cadena_bytes[:], []byte(newCadena))
-
-	fileblock.B_content = cadena_bytes
-
-	fmt.Println("\nImprimiendo fileblock.B_content con nuevo users.txt: ", string(fileblock.B_content[:]))
-
-	//ESCRIBIENDO FILEBLOCK
-	fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-
-	if err := EscribirObjeto(file, fileblock, int64(fileblock_start)); err != nil { //aqui solo escribi el primer EBR
-		return err
-
-	}
+	//Agregango newCadena con los grupos administradores(etc)removidos a los bloques de archivos
 
 	var tempfileblock Fileblock
+	var c int
 
-	fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
-	if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
-		return err
+	var bloque1 int
+	//var index int
+	var fileblock_start1 int32
+
+	for i := 0; i < len(crrInode.I_block); i++ { //iterando bloques de inodo1
+
+		if crrInode.I_block[i] != -1 {
+
+			bloque1 = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
+			//index = i
+
+			fileblock_start1 = tempSuperblock.S_block_start + int32(bloque1)*int32(binary.Size(Fileblock{}))
+
+			if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start1)); err != nil { //bloque1
+				return err
+			}
+
+			for i := 0; i < len(tempfileblock.B_content); i++ {
+
+				if c < len(newCadena) {
+
+					tempfileblock.B_content[i] = byte(newCadena[c])
+
+					c++
+
+				} else {
+					break
+				}
+
+			}
+
+			fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+			fmt.Println("\n Imprimiendo tempfileblock.B_content que se escribira en el archivo binario\n", string(tempfileblock.B_content[:]))
+
+			if err := EscribirObjeto(file, tempfileblock, int64(fileblock_start1)); err != nil { //aqui solo escribi el primer EBR
+				return err
+
+			}
+
+		}
 	}
+	//Agregando nuevo usuario a users.txt en fileblock.B_content
 
-	printFileblock(tempfileblock)
+	/*
+		var cadena_bytes [64]byte
+		copy(cadena_bytes[:], []byte(newCadena))
+
+		fileblock.B_content = cadena_bytes
+
+		fmt.Println("\nImprimiendo fileblock.B_content con nuevo users.txt: ", string(fileblock.B_content[:]))
+
+		//ESCRIBIENDO FILEBLOCK
+		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+
+		if err := EscribirObjeto(file, fileblock, int64(fileblock_start)); err != nil { //aqui solo escribi el primer EBR
+			return err
+
+		}
+
+		var tempfileblock Fileblock
+
+		fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
+		if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
+			return err
+		}
+
+		printFileblock(tempfileblock)*/
 
 	fmt.Println("\n\n========================= Fin RMGRP ===========================")
 
