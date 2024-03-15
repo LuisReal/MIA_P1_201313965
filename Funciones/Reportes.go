@@ -61,12 +61,79 @@ func Reportes(name string, path string, id string, ruta string) error {
 
 	if name == "tree" {
 		ReporteTree(index, path, file, TempMBR)
+	} else if name == "mbr" {
+		ReporteMbr(path, file)
 	}
 
 	fmt.Println("\n\n========================= Fin REPORTES ===========================")
 
 	return nil
 
+}
+
+func ReporteMbr(path string, file *os.File) error {
+
+	fmt.Println("\n\n========================= Iniciando Reporte MBR ===========================")
+	fmt.Printf("\npath: %s", path)
+	fmt.Println()
+
+	var TempMBR MBR
+
+	if err := LeerObjeto(file, &TempMBR, int64(0)); err != nil {
+		return err
+	}
+
+	PrintMBR(TempMBR)
+
+	grafo := `digraph H {
+		graph [pad="0.5", nodesep="0.5", ranksep="1"];
+		node [shape=plaintext]
+		rankdir=LR;`
+
+	grafo += `label=<
+			<table  border="0" cellborder="1" cellspacing="0">
+			<tr><td colspan="3" port='0'>Reporte MBR</td></tr>
+			<tr><td>mbr_tamano</td><td port='1'>` + strconv.Itoa(int(TempMBR.Mbr_tamano)) + `</td></tr>
+			<tr><td>mbr_fecha_creacion</td><td port='2'>` + string(TempMBR.Mbr_fecha_creacion[:]) + `</td></tr>
+			<tr><td>mbr_disk_signature </td><td port='3'>` + strconv.Itoa(int(TempMBR.Mbr_dsk_signature)) + `</td></tr>
+			</table>
+			>;`
+
+	grafo += `}`
+
+	//fmt.Println("\nImprimiendo grafo: ", grafo)
+	dot := "mbr.dot"
+
+	file, err := os.Create(dot)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	file.WriteString(grafo)
+
+	file.Close()
+
+	result := "mbr.png"
+	comando := "dot -Tpng " + dot + " -o " + result
+
+	fmt.Println("\nEl comando es:", comando)
+	//system(comando.c_str());
+
+	//exec.Command("dot", "-Tpng", dot, "-o", result)
+	out, err := exec.Command("dot", "-Tpng", dot, "-o", result).Output()
+
+	if err != nil {
+
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(out))
+
+	fmt.Println("\n\n========================= Finalizando Reporte MBR ===========================")
+
+	return nil
 }
 
 func ReporteTree(index int, path string, file *os.File, TempMBR MBR) error {
