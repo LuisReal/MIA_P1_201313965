@@ -77,8 +77,8 @@ func Mkfs(id string, type_ string, fs_ string) {
 
 	// var newMRB Structs.MRB
 	var newSuperblock Superblock
-	newSuperblock.S_inodes_count = 0
-	newSuperblock.S_blocks_count = 0
+	newSuperblock.S_inodes_count = n
+	newSuperblock.S_blocks_count = 3 * n
 
 	newSuperblock.S_free_blocks_count = 3 * n
 	newSuperblock.S_free_inodes_count = n
@@ -161,6 +161,10 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	Inode0.I_uid = 1
 	Inode0.I_gid = 1
 	Inode0.I_size = 0
+
+	// carpeta -> 0   archivo ->1
+	copy(Inode0.I_type[:], "0")
+
 	copy(Inode0.I_perm[:], "664")
 
 	for i := int32(0); i < 15; i++ {
@@ -188,7 +192,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	Inode1.I_uid = 1
 	Inode1.I_gid = 1
 	Inode1.I_size = int32(binary.Size(Folderblock{}))
-
+	copy(Inode1.I_type[:], "1") // es de tipo archivo
 	copy(Inode1.I_perm[:], "664")
 
 	for i := int32(0); i < 15; i++ {

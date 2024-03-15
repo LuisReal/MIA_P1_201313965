@@ -2,12 +2,13 @@ package Funciones
 
 import (
 	//"encoding/binary"
+	"encoding/binary"
 	"fmt"
 	"os"
 
-	//"strconv"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -42,7 +43,7 @@ func Reportes(name string, path string, id string, ruta string) error {
 	// Iterate over the partitions
 	for i := 0; i < 4; i++ {
 		if TempMBR.Mbr_partitions[i].Part_size != 0 {
-			if strings.Contains(string(TempMBR.Mbr_partitions[i].Part_id[:]), id) {
+			if strings.Contains(string(TempMBR.Mbr_partitions[i].Part_id[:]), strings.ToUpper(id)) {
 				fmt.Println("\n****Particion Encontrada*****")
 
 				index = i
@@ -70,6 +71,9 @@ func Reportes(name string, path string, id string, ruta string) error {
 
 func ReporteTree(index int, path string, file *os.File, TempMBR MBR) error {
 
+	fmt.Println("\n\n========================= Iniciando Reporte Tree ===========================")
+	fmt.Printf("\nIndex: %d, path: %s", index, path)
+	fmt.Println()
 	/*grafo := `digraph H {
 	graph [pad="0.5", nodesep="0.5", ranksep="1"];
 	node [shape=plaintext];
@@ -81,72 +85,128 @@ func ReporteTree(index int, path string, file *os.File, TempMBR MBR) error {
 		return err
 	}
 
+	Inodo_start := tempSuperblock.S_inode_start
+
+	var inodo Inode
+
 	grafo := `digraph H {
 		graph [pad="0.5", nodesep="0.5", ranksep="1"];
 		node [shape=plaintext]
-		 rankdir=LR;
-		 
-	  Inodo0 [
-	   label=<
-		 <table  border="0" cellborder="1" cellspacing="0">
-		   <tr><td colspan="3" port='0'>Inodo 0</td></tr>
-		   <tr><td>AD1</td><td port='1'>1</td></tr>
-		   <tr><td>AD2</td><td port='2'>-1</td></tr>
-			<tr><td>AD3</td><td port='3'>-1</td></tr>
-		   <tr><td>AD4</td><td port='4'>-1</td></tr>
-			<tr><td>AD5</td><td port='5'>-1</td></tr>
-		   <tr><td>AD6</td><td port='6'>-1</td></tr>
-		 </table>
-	  >];
-	  
-	  Bloque0 [
-	   label=<
-		 <table  border="0" cellborder="1" cellspacing="0">
-		   <tr><td colspan="3" port='0'>Bloque0</td></tr>
-		   <tr><td>AD1</td><td port='1'>.</td></tr>
-		   <tr><td>AD2</td><td port='2'>..</td></tr>
-		   <tr><td>AD3</td><td port='3'>users.txt</td></tr>
-		  
-		 </table>
-	  >];
-	  
-	  Inodo1 [
-	   label=<
-		 <table  border="0" cellborder="1" cellspacing="0">
-		   <tr><td colspan="3" port='0'>Inodo 1</td></tr>
-		   <tr><td>AD1</td><td port='1'>-1</td></tr>
-		   <tr><td>AD2</td><td port='2'>-1</td></tr>
-		   <tr><td>AD3</td><td port='3'>-1</td></tr>
-		   <tr><td>AD4</td><td port='4'>-1</td></tr>
-			<tr><td>AD5</td><td port='5'>-1</td></tr>
-		   <tr><td>AD6</td><td port='6'>-1</td></tr>
-		 </table>
-	  >];
-	  Bloque1 [
-	   label=<
-		 <table  border="0" cellborder="1" cellspacing="0">
-		   <tr><td colspan="3" port='0'>Bloque1</td></tr>
-		   <tr><td port='1'>1,G,root\n1,U,root,root,123</td></tr>
-		 </table>
-	  >]
-	  
-	  Bloque2 [
-	   label=<
-		 <table  border="0" cellborder="1" cellspacing="0">
-		   <tr><td colspan="3" port='0'>Bloque2</td></tr>
-		   <tr><td port='1'>2,U,usuarios,user,123</td></tr>
-		 </table>
-	  >];
-	
-	 
-	  Inodo0:1 -> Bloque0:0;
-	  Bloque0:3 -> Inodo1:0;
-	  Inodo1:1 -> Bloque1:0;
-	  Inodo1:2 -> Bloque2:0;
-	`
+		 rankdir=LR;`
+
+	fmt.Println("\n EL numero de inodos es: ", tempSuperblock.S_inodes_count)
+	fmt.Println("\n EL numero de bloques es: ", tempSuperblock.S_blocks_count)
+
+	for i := 0; i < int(tempSuperblock.S_inodes_count); i++ {
+		//fmt.Println("\nEstoy dentro del for de inodos")
+		if err := LeerObjeto(file, &inodo, int64(Inodo_start+int32(i)*int32(binary.Size(Inode{})))); err != nil {
+			return err
+		}
+
+		/*for i := int32(0); i < 15; i++ {
+			Inode0.I_block[i] = -1
+		}
+
+		Inode0.I_block[0] = 0
+		*/
+		grafo += `Inodo` + strconv.Itoa(i) + ` [
+			label=<
+				<table  border="0" cellborder="1" cellspacing="0">
+				<tr><td colspan="3" port='0'>Inodo` + strconv.Itoa(i) + `</td></tr>`
+
+		for j := 0; j < 15; j++ {
+			grafo += `<tr><td>AD` + strconv.Itoa(j+1) + `</td><td port='` + strconv.Itoa(j+1) + `'>` + strconv.Itoa(int(inodo.I_block[j])) + `</td></tr>`
+		}
+
+		grafo += `</table>
+			>];
+			
+			`
+
+		var bloque int32
+		for k := 0; k < 15; k++ {
+
+			if inodo.I_block[k] != -1 {
+
+				bloque = inodo.I_block[k] // esto contiene el numero de bloque
+			}
+		}
+
+		// carpeta -> 0   archivo -> 1
+		if string(inodo.I_type[:]) == "0" { // es un bloque de carpetas
+			var folder Folderblock
+
+			//fmt.Println("\nEstoy dentro del for de inodos")
+			if err := LeerObjeto(file, &folder, int64(tempSuperblock.S_block_start+int32(bloque)*int32(binary.Size(Folderblock{})))); err != nil {
+				return err
+			}
+
+			grafo += `Bloque` + strconv.Itoa(int(bloque)) + ` [
+			label=<
+			<table  border="0" cellborder="1" cellspacing="0">
+			<tr><td colspan="3" port='0'>Bloque` + strconv.Itoa(int(bloque)) + `</td></tr>`
+
+			var indice int
+
+			for j := 0; j < 4; j++ { // si es un bloque de carpetas
+
+				for k := 0; k < len(folder.B_content[j].B_name[:]); k++ {
+					if folder.B_content[j].B_name[k] == 0 { //quitando espacios(los ceros restantes) al slice de B_name
+						indice = k
+						break
+					}
+
+				}
+				//fmt.Println("\nEl indice es: ", indice)
+				contenido := string(folder.B_content[j].B_name[:indice])
+
+				grafo += `<tr><td>AD` + strconv.Itoa(j+1) + `</td><td port='` + strconv.Itoa(j+1) + `'>` + contenido + `</td></tr>`
+			}
+
+			grafo += `</table>
+				>];
+		
+			`
+
+		} else if string(inodo.I_type[:]) == "1" { //es un bloque de archivos
+			var file_block Fileblock
+
+			//fmt.Println("\nEstoy dentro del for de inodos")
+			if err := LeerObjeto(file, &file_block, int64(tempSuperblock.S_block_start+int32(bloque)*int32(binary.Size(Fileblock{})))); err != nil {
+				return err
+			}
+
+			grafo += `Bloque` + strconv.Itoa(int(bloque)) + ` [
+				label=<
+				<table  border="0" cellborder="1" cellspacing="0">
+				<tr><td colspan="3" port='0'>Bloque` + strconv.Itoa(int(bloque)) + `</td></tr>`
+
+			var indice int
+
+			for k := 0; k < len(file_block.B_content[:]); k++ {
+				if file_block.B_content[k] == 0 { //quitando espacios(los ceros restantes) al slice de B_content
+					indice = k
+					break
+				}
+
+			}
+			//contenido := string(folder.B_content[j].B_name[:indice])
+			contenido := string(file_block.B_content[:indice])
+
+			grafo += `<tr><td port='` + strconv.Itoa(int(bloque)+1) + `'>` + contenido + `</td></tr>`
+
+			grafo += `</table>
+					>];
+			
+				`
+
+		}
+	}
+
 	grafo += `}`
 
-	dot := "articulos.dot"
+	//fmt.Println("\nImprimiendo grafo: ", grafo)
+	dot := "tree.dot"
 
 	file, err := os.Create(dot)
 
@@ -174,5 +234,54 @@ func ReporteTree(index int, path string, file *os.File, TempMBR MBR) error {
 	}
 
 	fmt.Println(string(out))
+
+	fmt.Println("\n\n========================= Finalizando Reporte Tree ===========================")
+
 	return nil
 }
+
+/*	Inodo0:1 -> Bloque0:0;
+ 	Bloque0:3 -> Inodo1:0;
+	Inodo1:1 -> Bloque1:0;
+	Inodo1:2 -> Bloque2:0;
+
+Inodo1 [
+	   label=<
+		 <table  border="0" cellborder="1" cellspacing="0">
+		   <tr><td colspan="3" port='0'>Inodo 1</td></tr>
+		   <tr><td>AD1</td><td port='1'>-1</td></tr>
+		   <tr><td>AD2</td><td port='2'>-1</td></tr>
+		   <tr><td>AD3</td><td port='3'>-1</td></tr>
+		   <tr><td>AD4</td><td port='4'>-1</td></tr>
+			<tr><td>AD5</td><td port='5'>-1</td></tr>
+		   <tr><td>AD6</td><td port='6'>-1</td></tr>
+		 </table>
+	  >];
+
+Bloque0 [
+	   label=<
+		 <table  border="0" cellborder="1" cellspacing="0">
+		   <tr><td colspan="3" port='0'>Bloque0</td></tr>
+		   <tr><td>AD1</td><td port='1'>.</td></tr>
+		   <tr><td>AD2</td><td port='2'>..</td></tr>
+		   <tr><td>AD3</td><td port='3'>users.txt</td></tr>
+
+		 </table>
+	  >];
+
+Bloque1 [
+	   label=<
+		 <table  border="0" cellborder="1" cellspacing="0">
+		   <tr><td colspan="3" port='0'>Bloque1</td></tr>
+		   <tr><td port='1'>1,G,root\n1,U,root,root,123</td></tr>
+		 </table>
+	  >]
+
+	  Bloque2 [
+	   label=<
+		 <table  border="0" cellborder="1" cellspacing="0">
+		   <tr><td colspan="3" port='0'>Bloque2</td></tr>
+		   <tr><td port='1'>2,U,usuarios,user,123</td></tr>
+		 </table>
+	  >];
+*/
