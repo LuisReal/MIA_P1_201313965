@@ -25,8 +25,7 @@ digraph H {
 				<tr><td colspan="3" port='0'>Bloque1</td></tr><tr><td port='2'>1,G,root
 1,U,root,root,123
 2,G,usuarios
-2,U,usuarios,user1,123
-</td></tr></table>
+2,U,usuarios,user1,contr</td></tr></table>
 					>];
 			
 				Inodo2 [

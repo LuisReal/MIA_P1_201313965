@@ -191,7 +191,14 @@ func ReporteTree(index int, path string, file *os.File, TempMBR MBR) error {
 
 			}
 			//contenido := string(folder.B_content[j].B_name[:indice])
-			contenido := string(file_block.B_content[:indice])
+			var contenido string
+			if indice == 0 { // significa que el slice fileblock.B_content esta lleno
+				contenido = string(file_block.B_content[:])
+			} else { //el slice todavia tiene espacios vacios
+				contenido = string(file_block.B_content[:indice])
+			}
+
+			fmt.Println("\nEl contenido de fileblock es: ", contenido)
 
 			grafo += `<tr><td port='` + strconv.Itoa(int(bloque)+1) + `'>` + contenido + `</td></tr>`
 
