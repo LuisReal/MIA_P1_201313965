@@ -63,9 +63,64 @@ func Reportes(name string, path string, id string, ruta string) error {
 		ReporteTree(index, path, file, TempMBR)
 	} else if name == "mbr" {
 		ReporteMbr(path, file)
+	} else if name == "disk" {
+		ReporteDisk(path, file)
 	}
 
 	fmt.Println("\n\n========================= Fin REPORTES ===========================")
+
+	return nil
+
+}
+
+func ReporteDisk(path string, file *os.File) error {
+
+	fmt.Println("\n\n========================= Iniciando Reporte DISK ===========================")
+
+	var TempMBR MBR
+
+	if err := LeerObjeto(file, &TempMBR, int64(0)); err != nil {
+		return err
+	}
+
+	PrintMBR(TempMBR)
+
+	grafo := `digraph H {
+			graph [pad="0.5", nodesep="0.5", ranksep="1"];
+			node [shape=plaintext]
+			rankdir=LR;`
+
+	dot := "disk.dot"
+
+	file, err := os.Create(dot)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	file.WriteString(grafo)
+
+	file.Close()
+
+	//-path=/home/darkun/Escritorio/mbr.pdf
+	//dot -Tpdf mbr.dot  -o mbr.pdf
+
+	fmt.Println("\nEl path es: ", path)
+
+	result := path
+
+	//exec.Command("dot", "-Tpng", dot, "-o", result)
+	out, err := exec.Command("dot", "-Tpdf", dot, "-o", result).Output()
+
+	if err != nil {
+
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(out))
+
+	fmt.Println("\n\n========================= Finalizando Reporte DISK ===========================")
 
 	return nil
 
@@ -96,7 +151,7 @@ func ReporteMbr(path string, file *os.File) error {
 				<table  border="0" cellborder="1" cellspacing="0">`
 	contador++
 
-	grafo += `<tr><td colspan="3" port='` + strconv.Itoa(contador) + `'>Reporte MBR</td></tr>`
+	grafo += `<tr><td colspan="3" style="filled" bgcolor="#FFD700"  port='` + strconv.Itoa(contador) + `'>Reporte MBR</td></tr>`
 
 	contador++
 
@@ -120,7 +175,7 @@ func ReporteMbr(path string, file *os.File) error {
 
 			grafo += `
 
-				<tr><td colspan="3" port='` + strconv.Itoa(contador) + `'>Particion</td></tr>`
+				<tr><td colspan="3" align="left" style="filled" bgcolor="lightblue" port='` + strconv.Itoa(contador) + `'>Particion</td></tr>`
 
 			contador++
 
@@ -159,8 +214,128 @@ func ReporteMbr(path string, file *os.File) error {
 
 	}
 
+	//grafo += `</table> >`
+
+	/*grafo += `label=<
+	<table  border="0" cellborder="1" cellspacing="0">`*/
+
+	fmt.Println("\nCreando REPORTE EBR")
+	var cont int
+	for j := 0; j < 4; j++ {
+
+		if string(TempMBR.Mbr_partitions[j].Part_type[:]) == "e" {
+
+			cont++
+
+			grafo += `
+
+				<tr><td colspan="3" style="filled" bgcolor="#FFD700" port='` + strconv.Itoa(cont) + `'> Reporte EBR</td></tr>`
+
+			inicio := TempMBR.Mbr_partitions[j].Part_start
+
+			var tempEBR EBR
+
+			if err := LeerObjeto(file, &tempEBR, int64(inicio)); err != nil { // obtiene el primer ebr
+				return err
+			}
+
+			cont++
+
+			var part_name string // elimina los espacios en el slice para que pueda ser leido por graphviz
+			for j := 0; j < len(tempEBR.Part_name); j++ {
+
+				if tempEBR.Part_name[j] != 0 {
+					part_name += string(tempEBR.Part_name[j])
+				}
+
+			}
+
+			grafo += `<tr><td colspan="3" style="filled" bgcolor="lightblue" port='` + strconv.Itoa(cont) + `'>` + part_name + `</td></tr>`
+
+			cont++
+			grafo += `<tr><td>Status</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.FormatBool(tempEBR.Part_mount) + `</td></tr>`
+
+			var part_fit string // elimina los espacios en el slice para que pueda ser leido por graphviz
+			for j := 0; j < len(tempEBR.Part_fit); j++ {
+
+				if tempEBR.Part_fit[j] != 0 {
+					part_name += string(tempEBR.Part_fit[j])
+				}
+
+			}
+
+			cont++
+			grafo += `<tr><td>Fit</td><td port='` + strconv.Itoa(cont) + `'>` + part_fit + `</td></tr>`
+
+			cont++
+			grafo += `<tr><td>Size</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.Itoa(int(tempEBR.Part_size)) + `</td></tr>`
+
+			cont++
+			grafo += `<tr><td>Next</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.Itoa(int(tempEBR.Part_next)) + `</td></tr>`
+
+			cont++
+			grafo += `<tr><td>Start</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.Itoa(int(tempEBR.Part_start)) + `</td></tr>`
+
+			part_size := tempEBR.Part_size
+
+			for part_size != 0 { // obtiene los siguientes EBR analizando si existen por medio de su tamano
+
+				part_start := tempEBR.Part_next
+
+				if err := LeerObjeto(file, &tempEBR, int64(part_start)); err != nil { // obtiene el primer ebr
+					return err
+				}
+
+				if tempEBR.Part_size != 0 {
+					var part_name string // elimina los espacios en el slice para que pueda ser leido por graphviz
+					for j := 0; j < len(tempEBR.Part_name); j++ {
+
+						if tempEBR.Part_name[j] != 0 {
+							part_name += string(tempEBR.Part_name[j])
+						}
+
+					}
+
+					cont++
+
+					grafo += `<tr><td colspan="3" style="filled" bgcolor="lightblue" port='` + strconv.Itoa(cont) + `'>` + part_name + `</td></tr>`
+
+					cont++
+					grafo += `<tr><td>Status</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.FormatBool(tempEBR.Part_mount) + `</td></tr>`
+
+					var part_fit string // elimina los espacios en el slice para que pueda ser leido por graphviz
+					for j := 0; j < len(tempEBR.Part_fit); j++ {
+
+						if tempEBR.Part_fit[j] != 0 {
+							part_name += string(tempEBR.Part_fit[j])
+						}
+
+					}
+
+					cont++
+					grafo += `<tr><td>Fit</td><td port='` + strconv.Itoa(cont) + `'>` + part_fit + `</td></tr>`
+
+					cont++
+					grafo += `<tr><td>Size</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.Itoa(int(tempEBR.Part_size)) + `</td></tr>`
+
+					cont++
+					grafo += `<tr><td>Next</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.Itoa(int(tempEBR.Part_next)) + `</td></tr>`
+
+					cont++
+					grafo += `<tr><td>Start</td><td port='` + strconv.Itoa(cont) + `'>` + strconv.Itoa(int(tempEBR.Part_start)) + `</td></tr>`
+
+				}
+
+				part_size = tempEBR.Part_size
+
+			}
+
+		}
+
+	}
+
 	grafo += `</table>
-				>;`
+				>`
 
 	grafo += `}`
 
@@ -199,16 +374,6 @@ func ReporteMbr(path string, file *os.File) error {
 	fmt.Println("\n\n========================= Finalizando Reporte MBR ===========================")
 
 	return nil
-}
-
-func ReporteEBR(path string, file *os.File) {
-
-	fmt.Println("\n\n========================= Iniciando Reporte EBR ===========================")
-	fmt.Printf("\npath: %s", path)
-	fmt.Println()
-
-	fmt.Println("\n\n========================= Finalizando Reporte EBR ===========================")
-
 }
 
 func ReporteTree(index int, path string, file *os.File, TempMBR MBR) error {
