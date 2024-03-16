@@ -97,29 +97,82 @@ func ReporteDisk(path string, file *os.File) error {
 	grafo := `digraph G {
 		node [shape=record];`
 
-	grafo += `struct1 [label="MBR &#92;n 20%|`
+	//MBR &#92;n 20%|
+	grafo += `struct1 [label="MBR|`
 
-	grafo += `ParticionPrimaria|`
+	for i := 0; i < 4; i++ {
 
-	grafo += `{ Extendida | {EBR | Logica1 | EBR | Logica2 | EBR | Logica3}}|`
+		if string(TempMBR.Mbr_partitions[i].Part_type[:]) == "p" {
 
-	grafo += `Primaria |`
+			grafo += `Primaria|`
+
+		} else if string(TempMBR.Mbr_partitions[i].Part_type[:]) == "e" {
+
+			inicio := TempMBR.Mbr_partitions[i].Part_start
+
+			grafo += `{ Extendida |`
+
+			var tempEBR EBR
+
+			if err := LeerObjeto(file, &tempEBR, int64(inicio)); err != nil { // obtiene el primer ebr
+				return err
+			}
+
+			part_size := tempEBR.Part_size
+
+			grafo += `{`
+
+			grafo += `EBR |`
+
+			var part_name string // elimina los espacios en el slice para que pueda ser leido por graphviz
+			for j := 0; j < len(tempEBR.Part_name); j++ {
+				if tempEBR.Part_name[j] != 0 {
+					part_name += string(tempEBR.Part_name[j])
+				}
+
+			}
+
+			grafo += part_name + ` |`
+
+			for part_size != 0 { // obtiene los siguientes EBR analizando si existen por medio de su tamano
+
+				grafo += `EBR |`
+
+				part_start := tempEBR.Part_next
+
+				if err := LeerObjeto(file, &tempEBR, int64(part_start)); err != nil { // obtiene el primer ebr
+					return err
+				}
+
+				if tempEBR.Part_size != 0 {
+
+					var part_name string // elimina los espacios en el slice para que pueda ser leido por graphviz
+					for j := 0; j < len(tempEBR.Part_name); j++ {
+						if tempEBR.Part_name[j] != 0 {
+							part_name += string(tempEBR.Part_name[j])
+						}
+
+					}
+
+					grafo += part_name + ` |`
+
+					//grafo += `Logica1 | EBR | Logica2 | EBR | Logica3}|`
+
+				}
+
+				part_size = tempEBR.Part_size
+
+			}
+
+			grafo += `}}|`
+
+			//grafo += `{ Extendida | {EBR | Logica1 | EBR | Logica2 | EBR | Logica3}}|`
+		}
+	}
+
 	grafo += `Libre `
 	grafo += `"];`
 	grafo += `}`
-
-	/*
-		var contador int
-
-		grafo += `label=<
-							<table  border="0" cellborder="1" cellspacing="0">`
-		contador++
-
-		grafo += `<tr><td colspan="3" style="filled" bgcolor="#FFD700"  port='` + strconv.Itoa(contador) + `'>Reporte DISK</td></tr>`
-
-		contador++
-
-		grafo += `<tr><td>mbr_tamano</td><td port='` + strconv.Itoa(contador) + `'>` + strconv.Itoa(int(TempMBR.Mbr_tamano)) + `</td></tr>`*/
 
 	dot := "disk.dot"
 
