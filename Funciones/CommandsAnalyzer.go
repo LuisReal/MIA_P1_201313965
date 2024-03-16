@@ -172,8 +172,8 @@ func bn_reportes(params string) {
 	// Process the input
 	for _, match := range matches {
 		flagName := match[1]
-		flagValue := strings.ToLower(match[2])
-
+		//flagValue := strings.ToLower(match[2])
+		flagValue := match[2]
 		flagValue = strings.Trim(flagValue, "\"")
 
 		switch flagName {
