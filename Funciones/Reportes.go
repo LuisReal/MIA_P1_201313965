@@ -85,10 +85,41 @@ func ReporteDisk(path string, file *os.File) error {
 
 	PrintMBR(TempMBR)
 
-	grafo := `digraph H {
-			graph [pad="0.5", nodesep="0.5", ranksep="1"];
-			node [shape=plaintext]
-			rankdir=LR;`
+	/*node [shape=record];
+	  struct3 [label="MBR &#92;n 20%|
+	  Libre
+	  |{ Extendida |{EBR|Logica1|EBR |Logica2 |EBR}}|
+	  Primaria | Libre
+
+	  "];
+	*/
+
+	grafo := `digraph G {
+		node [shape=record];`
+
+	grafo += `struct1 [label="MBR &#92;n 20%|`
+
+	grafo += `ParticionPrimaria|`
+
+	grafo += `{ Extendida | {EBR | Logica1 | EBR | Logica2 | EBR | Logica3}}|`
+
+	grafo += `Primaria |`
+	grafo += `Libre `
+	grafo += `"];`
+	grafo += `}`
+
+	/*
+		var contador int
+
+		grafo += `label=<
+							<table  border="0" cellborder="1" cellspacing="0">`
+		contador++
+
+		grafo += `<tr><td colspan="3" style="filled" bgcolor="#FFD700"  port='` + strconv.Itoa(contador) + `'>Reporte DISK</td></tr>`
+
+		contador++
+
+		grafo += `<tr><td>mbr_tamano</td><td port='` + strconv.Itoa(contador) + `'>` + strconv.Itoa(int(TempMBR.Mbr_tamano)) + `</td></tr>`*/
 
 	dot := "disk.dot"
 

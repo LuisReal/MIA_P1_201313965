@@ -2,7 +2,7 @@ digraph H {
 			graph [pad="0.5", nodesep="0.5", ranksep="1"];
 			node [shape=plaintext]
 			rankdir=LR;label=<
-				<table  border="0" cellborder="1" cellspacing="0"><tr><td colspan="3" style="filled" bgcolor="#FFD700"  port='1'>Reporte MBR</td></tr><tr><td>mbr_tamano</td><td port='2'>1048576</td></tr><tr><td>mbr_fecha_creacion</td><td port='3'>2024-03-15 22:50</td></tr><tr><td>mbr_disk_signature </td><td port='4'>70</td></tr>
+				<table  border="0" cellborder="1" cellspacing="0"><tr><td colspan="3" style="filled" bgcolor="#FFD700"  port='1'>Reporte MBR</td></tr><tr><td>mbr_tamano</td><td port='2'>1048576</td></tr><tr><td>mbr_fecha_creacion</td><td port='3'>2024-03-15 23:52</td></tr><tr><td>mbr_disk_signature </td><td port='4'>3</td></tr>
 
 				<tr><td colspan="3" align="left" style="filled" bgcolor="lightblue" port='5'>Particion</td></tr><tr><td>status</td><td port='6'>false</td></tr><tr><td>type</td><td port='7'>p</td></tr><tr><td>fit</td><td port='8'>b</td></tr><tr><td>start</td><td port='9'>165</td></tr><tr><td>size</td><td port='10'>10</td></tr>
 

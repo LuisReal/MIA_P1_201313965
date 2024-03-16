@@ -1,0 +1,2 @@
+digraph G {
+		node [shape=record];struct1 [label="MBR &#92;n 20%|ParticionPrimaria|{ Extendida | {EBR | Logica1 | EBR | Logica2 | EBR | Logica3}}|Primaria |Libre "];}
