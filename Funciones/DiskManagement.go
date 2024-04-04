@@ -17,7 +17,10 @@ import (
 func Mkdisk(size int, fit string, unit string, letra string) {
 
 	fmt.Println("\n\n==================================== Iniciando funcion MKDISK ====================================")
-	fmt.Println("Size:", size, " Fit: ", fit, " Unit: ", unit)
+
+	letra = strings.ToUpper(letra)
+
+	fmt.Println("Disco: ", letra, "Size:", size, " Fit: ", fit, " Unit: ", unit)
 
 	// validando que el tamano sea mayor que cero
 	if size <= 0 {
@@ -26,15 +29,26 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 	}
 
 	// validando que el ajuste ingresado por el usuario sea el correcto
-	if fit != "b" && fit != "w" && fit != "f" {
-		fmt.Println("Error: Ingrese el ajuste correcto")
-		return
+
+	if fit != "" {
+		if fit != "bf" && fit != "wf" && fit != "ff" {
+			fmt.Println("Error: Ingrese el ajuste correcto")
+			return
+		}
+	} else {
+		fit = "ff"
 	}
 
 	// Validando que las unidades ingresadas por el usuario esten correctas
-	if unit != "k" && unit != "m" {
-		fmt.Println("Error: La unidad(unit) debe ser k o m")
-		return
+
+	if unit != "" {
+
+		if unit != "k" && unit != "m" {
+			fmt.Println("Error: La unidad(unit) debe ser k o m")
+			return
+		}
+	} else {
+		unit = "m"
 	}
 
 	// Configurando el tamano en bytes
@@ -60,8 +74,14 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 
 	//Creando el archivo binario con ceros
 
-	for i := 0; i < size; i++ {
-		err := EscribirObjeto(file, byte(0), int64(i))
+	buffer := make([]byte, 1024)
+
+	for i := 0; i < 1024; i++ {
+		buffer[i] = 0
+	}
+
+	for i := 0; i < size; i += 1024 {
+		_, err := file.Write(buffer)
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
@@ -76,6 +96,8 @@ func Mkdisk(size int, fit string, unit string, letra string) {
 }
 
 func Rmdisk(driveletter string) {
+
+	driveletter = strings.ToUpper(driveletter)
 	// Open bin file
 	fmt.Println("\n\n==================================== Iniciando funcion RMDISK ====================================")
 
@@ -85,7 +107,7 @@ func Rmdisk(driveletter string) {
 
 	for entrada != "y" || entrada != "n" {
 
-		fmt.Println("\nDesea eliminar el disco " + strings.ToUpper(driveletter) + "?")
+		fmt.Println("\nDesea eliminar el disco " + driveletter + "?")
 		fmt.Println("Presione la tecla (y) para continuar y eliminarlo")
 		fmt.Println("Presione la tecla (n) para cancelar")
 
@@ -94,12 +116,12 @@ func Rmdisk(driveletter string) {
 		input := lector.Text()
 
 		if input == "y" {
-			err := os.Remove("./archivos/" + strings.ToUpper(driveletter) + ".dsk")
+			err := os.Remove("./archivos/" + driveletter + ".dsk")
 			if err != nil {
 				fmt.Println("\n\n****************** El disco a eliminar NO EXISTE **************************")
 				return
 			} else {
-				fmt.Println("\n             Disco " + strings.ToUpper(driveletter) + " Eliminado Exitosamente ................")
+				fmt.Println("\n             Disco " + driveletter + " Eliminado Exitosamente ................")
 			}
 
 			break
@@ -186,19 +208,48 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 
 	if delete == "full" {
 		fmt.Println("\n RECIBIENDO delete=full")
-		if formateo == "rapido" {
 
-			//formateo_rapido(name, TemporalMBR, file)
-			formateo_rapido(name, TemporalMBR, file)
-		} else if formateo == "completo" {
-			formateo_completo(name, TemporalMBR, file)
+		lector := bufio.NewScanner(os.Stdin)
+
+		entrada := "x"
+
+		for entrada != "y" || entrada != "n" {
+
+			fmt.Println("\nDesea eliminar La particion " + name + "?")
+			fmt.Println("Presione la tecla (y) para continuar y eliminarlo")
+			fmt.Println("Presione la tecla (n) para cancelar")
+
+			lector.Scan()
+
+			input := lector.Text()
+
+			if input == "y" {
+
+				if formateo == "rapido" {
+
+					//formateo_rapido(name, TemporalMBR, file)
+					formateo_rapido(name, TemporalMBR, file)
+
+					break
+				} else if formateo == "completo" {
+					formateo_completo(name, TemporalMBR, file)
+
+					break
+				}
+			} else if input == "n" {
+				fmt.Println("\n      Cancelando la eliminacion ..................")
+				break
+			} else {
+				fmt.Println("\n\n                 Ingrese una opcion correcta")
+
+			}
+
 		}
-
 		return
 	}
 
 	// validando que el tamano sea mayor que cero
-	if size <= 0 {
+	if size == 0 {
 		fmt.Println("Error: El tamano(size) debe ser mayor a cero")
 		return
 	}
@@ -217,6 +268,28 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 	} else if unit == "m" {
 		size = size * 1024 * 1024
 		add = add * 1024 * 1024
+	}
+
+	var espacio_ocupado int32
+
+	for i := 0; i < 4; i++ {
+
+		espacio_ocupado += TemporalMBR.Mbr_partitions[i].Part_size
+
+	}
+
+	tamano_libre := TemporalMBR.Mbr_tamano - espacio_ocupado
+
+	if tamano_libre < int32(size) {
+		fmt.Println("\n\n         NO hay suficiente espacio en el disco")
+		fmt.Println()
+		return
+	}
+
+	if tamano_libre < int32(add) {
+		fmt.Println("\n\n         NO hay suficiente espacio en el disco")
+		fmt.Println()
+		return
 	}
 
 	if add != 0 {
@@ -243,7 +316,7 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 					} else {
 
 						if TemporalMBR.Mbr_partitions[i].Part_size < int32(math.Abs(float64(add))) {
-							fmt.Println("\n\nEl tamano de la particion es menor que el espacio a quitar")
+							fmt.Println("\n\n ***** ERROR: El tamano de la particion es menor que el espacio a quitar *****")
 							return
 						} else {
 							fmt.Println("\n********************Quitando espacio a la particion: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
@@ -334,6 +407,12 @@ func Fdisk(size int, driveletter string, name string, unit string, type_ string,
 				count++
 				gap = TemporalMBR.Mbr_partitions[i].Part_start + TemporalMBR.Mbr_partitions[i].Part_size
 			}
+		}
+
+		if count == 4 {
+			fmt.Println("\n           No puede haber mas de 4 particiones en el disco")
+			fmt.Println()
+			return
 		}
 
 		for i := 0; i < 4; i++ {
@@ -563,10 +642,13 @@ func formateo_rapido(name string, TemporalMBR MBR, file *os.File) {
 
 	for i := 0; i < 4; i++ {
 
+		//fmt.Println("\n name_bytes: ", string(name_bytes[:]))
+		//fmt.Println("\n TemporalMBR.mbr_partitions[i].Part_name: ", string(TemporalMBR.Mbr_partitions[i].Part_name[:]))
+
 		if name_bytes == TemporalMBR.Mbr_partitions[i].Part_name {
 
 			if TemporalMBR.Mbr_partitions[i].Part_size == 0 {
-				fmt.Println("\n************LA PARTICION NO EXISTE***************")
+				fmt.Println("\n************LA PARTICION NO EXISTE (1)***************")
 				fmt.Println()
 				break
 			} else {
@@ -591,10 +673,92 @@ func formateo_rapido(name string, TemporalMBR MBR, file *os.File) {
 			cont_existPartition++
 		}
 
+		if string(TemporalMBR.Mbr_partitions[i].Part_type[:]) == "e" {
+
+			inicio := TemporalMBR.Mbr_partitions[i].Part_start
+
+			var tempEBR EBR
+
+			if err := LeerObjeto(file, &tempEBR, int64(inicio)); err != nil { // obtiene el primer ebr
+				return
+			}
+
+			if tempEBR.Part_size != 0 {
+
+				var fit_defecto [16]byte
+				//var name_defecto [16]byte
+
+				if name_bytes == tempEBR.Part_name {
+					fmt.Println("\n Eliminando la particion logica ", string(name_bytes[:]))
+					tempEBR.Part_fit = fit_defecto
+					tempEBR.Part_mount = false
+					tempEBR.Part_name = nombre_defecto
+					tempEBR.Part_size = int32(0)
+
+					if err := EscribirObjeto(file, tempEBR, int64(inicio)); err != nil {
+						return
+					}
+
+					cont_existPartition++
+				}
+
+				var tempEBR2 EBR
+
+				if err := LeerObjeto(file, &tempEBR2, int64(inicio)); err != nil { // obtiene el primer ebr
+					return
+				}
+
+				PrintEBR(tempEBR2)
+			}
+
+			part_next := tempEBR.Part_next
+
+			for part_next != 0 { // obtiene los siguientes EBR analizando si existen por medio de su tamano
+
+				part_start := tempEBR.Part_next
+
+				if err := LeerObjeto(file, &tempEBR, int64(part_start)); err != nil { // obtiene el primer ebr
+					return
+				}
+
+				if tempEBR.Part_size != 0 {
+
+					var fit_defecto [16]byte
+					//var name_defecto [16]byte
+
+					if name_bytes == tempEBR.Part_name {
+						fmt.Println("\n Eliminando la particion logica ", string(name_bytes[:]))
+						tempEBR.Part_fit = fit_defecto
+						tempEBR.Part_mount = false
+						tempEBR.Part_name = nombre_defecto
+						tempEBR.Part_size = int32(0)
+
+						if err := EscribirObjeto(file, tempEBR, int64(tempEBR.Part_start-int32(binary.Size(EBR{})))); err != nil {
+							return
+						}
+
+						cont_existPartition++
+					}
+				}
+
+				part_next = tempEBR.Part_next
+
+				var tempEBR2 EBR
+
+				if err := LeerObjeto(file, &tempEBR2, int64(tempEBR.Part_start-int32(binary.Size(EBR{})))); err != nil { // obtiene el primer ebr
+					return
+				}
+
+				PrintEBR(tempEBR2)
+
+			}
+
+		}
+
 	}
 
 	if cont_existPartition == 0 {
-		fmt.Println("*************\nLa particion NO existe************")
+		fmt.Println("*************\nLa particion NO existe (2)************")
 		fmt.Println()
 		return
 	}
@@ -709,9 +873,11 @@ func Mount(driveletter string, name string) {
 	copy(name_bytes[:], []byte(name))
 
 	for i := 0; i < 4; i++ {
+
+		count++
+
 		if TempMBR.Mbr_partitions[i].Part_size != int32(0) {
 
-			count++
 			if name_bytes == TempMBR.Mbr_partitions[i].Part_name {
 				//// id = DriveLetter + Correlative + 65
 				indice = i
@@ -724,24 +890,32 @@ func Mount(driveletter string, name string) {
 
 	if exist > 0 {
 
-		if !TempMBR.Mbr_partitions[indice].Part_status { // (!true) si es false
+		if string(TempMBR.Mbr_partitions[indice].Part_type[:]) == "p" {
 
-			id := strings.ToUpper(driveletter) + strconv.Itoa(count) + "65"
-			fmt.Println("\n               -------------------El id de la particion es: ", id)
+			if !TempMBR.Mbr_partitions[indice].Part_status { // (!true) si es false
 
-			var id_bytes [4]byte
-			copy(id_bytes[:], []byte(id))
+				id := strings.ToUpper(driveletter) + strconv.Itoa(count) + "65"
+				fmt.Println("\n               -------------------El id de la particion es: ", id)
 
-			TempMBR.Mbr_partitions[indice].Part_id = id_bytes
-			TempMBR.Mbr_partitions[indice].Part_status = true
-			TempMBR.Mbr_partitions[indice].Part_correlative = int32(count)
+				var id_bytes [4]byte
+				copy(id_bytes[:], []byte(id))
 
-			if err := EscribirObjeto(file, TempMBR, 0); err != nil {
-				return
+				TempMBR.Mbr_partitions[indice].Part_id = id_bytes
+				TempMBR.Mbr_partitions[indice].Part_status = true
+				TempMBR.Mbr_partitions[indice].Part_correlative = int32(count)
+
+				if err := EscribirObjeto(file, TempMBR, 0); err != nil {
+					return
+				}
+			} else {
+				fmt.Println("\n\n*************************La particion ya esta montada por lo que no se puede volver a montar******************")
+				fmt.Println()
 			}
+
 		} else {
-			fmt.Println("\n\n*************************La particion ya esta montada por lo que no se puede volver a montar******************")
+			fmt.Println("\n    ***** ERROR: solo se pueden montar particiones primarias ****")
 			fmt.Println()
+			return
 		}
 
 	} else {
@@ -767,10 +941,12 @@ func UnMount(id string) {
 
 	fmt.Println()
 
+	id = strings.ToUpper(id)
+
 	driveletter := id[0]
 	correlativo := id[1]
 	// Open bin file
-	file, err := AbrirArchivo("./archivos/" + strings.ToUpper(string(driveletter)) + ".dsk")
+	file, err := AbrirArchivo("./archivos/" + string(driveletter) + ".dsk")
 	if err != nil {
 		fmt.Println("\n\n*************************No existe el disco buscado*******************")
 		return
@@ -807,6 +983,9 @@ func UnMount(id string) {
 		if TempMBR.Mbr_partitions[indice].Part_status { // si es true
 			fmt.Println("\n               -------------------El id de la particion es: ", id)
 
+			fmt.Println("\n            ***** Desmontando Particion ******")
+			fmt.Println()
+
 			var id_bytes [4]byte
 			//copy(id_bytes[:], []byte(id))
 
@@ -823,6 +1002,8 @@ func UnMount(id string) {
 
 	} else {
 		fmt.Println("\n\n        ****************************La particion NO existe****************************")
+
+		fmt.Println("\n================================= Finalizando UNMOUNT ======================================")
 		return
 	}
 
@@ -834,7 +1015,7 @@ func UnMount(id string) {
 	PrintMBR(TemporalMBR3)
 	defer file.Close()
 
-	fmt.Println("\n================================= Finalizando MOUNT ======================================")
+	fmt.Println("\n================================= Finalizando UNMOUNT ======================================")
 
 	fmt.Println()
 

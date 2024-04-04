@@ -1,0 +1,9 @@
+digraph H {
+			labelloc="t";
+			label="Disco A";
+			fontsize="50"
+			graph [pad="0.5", nodesep="0.5", ranksep="1"];
+			node [shape=plaintext]
+			rankdir=LR;label=<
+				<table  border="0" cellborder="1" cellspacing="0"><tr><td colspan="3" style="filled" bgcolor="#FFD700"  port='1'>Reporte Superbloque</td></tr><tr><td>File System Type</td><td port='2'>2</td></tr><tr><td>Inodes count</td><td port='3'>24347</td></tr><tr><td>Blocks count </td><td port='4'>73041</td></tr><tr><td>Free Blocks count </td><td port='5'>72978</td></tr><tr><td>Free Inodes count </td><td port='6'>24307</td></tr><tr><td>Mnt count </td><td port='7'>0</td></tr><tr><td>Inode size </td><td port='8'>127</td></tr><tr><td>Block size </td><td port='9'>64</td></tr><tr><td>Bitmap Inode Start </td><td port='10'>259</td></tr><tr><td>Bitmap Block start </td><td port='11'>24606</td></tr><tr><td>Inode Start </td><td port='12'>97647</td></tr><tr><td>Block Start </td><td port='13'>3189716</td></tr></table>
+				>}

@@ -5,7 +5,9 @@ import (
 )
 
 type User struct {
-	Id              string
+	Gid             string // id del grupo al que pertenece el usuario
+	Uid             string // id del usuario
+	Id              string // Id de la particion donde se encuentra el ext2 o el ext3
 	Nombre          string
 	Status          bool      // (por defecto es false) indica true si el usuario esta logueado
 	Fileblock       Fileblock // contiene data := "1,G,root\n1,U,root,root,123\n"
@@ -31,7 +33,9 @@ func PrintMBR(data MBR) {
 
 	for i := 0; i < 4; i++ {
 
-		fmt.Printf(" Particion: %d, Tipo de Particion:  %s, Tamano de Particion: %d, start: %d, id: %s, correlativo: %d, status: %t", i, string(data.Mbr_partitions[i].Part_type[:]), int(data.Mbr_partitions[i].Part_size), int(data.Mbr_partitions[i].Part_start), string(data.Mbr_partitions[i].Part_id[:]), int(data.Mbr_partitions[i].Part_correlative), data.Mbr_partitions[i].Part_status)
+		fmt.Printf(" Particion: %d, Nombre: %s, Tipo de Particion:  %s, fit: %s,Tamano de Particion: %d, start: %d, id: %s, correlativo: %d, status: %t",
+			i, string(data.Mbr_partitions[i].Part_name[:]), string(data.Mbr_partitions[i].Part_type[:]), string(data.Mbr_partitions[i].Part_fit[:]), int(data.Mbr_partitions[i].Part_size), int(data.Mbr_partitions[i].Part_start),
+			string(data.Mbr_partitions[i].Part_id[:]), int(data.Mbr_partitions[i].Part_correlative), data.Mbr_partitions[i].Part_status)
 		fmt.Println()
 	}
 
@@ -98,7 +102,7 @@ type Superblock struct {
 	S_magic             int32    //Valor que identifica al sistema de archivos, tendrá el valor 0xEF53
 	S_inode_size        int32    //Tamaño del inodo
 	S_block_size        int32    //Tamaño del bloque
-	S_fist_inode        int32    //Primer inodo libre
+	S_first_inode       int32    //Primer inodo libre
 	S_first_block       int32    //Primer bloque libre
 	S_bm_inode_start    int32    //Guardará el inicio del bitmap de inodos
 	S_bm_block_start    int32    //Guardará el inicio del bitmap de bloques
@@ -108,10 +112,14 @@ type Superblock struct {
 
 func PrintSuperblock(data Superblock) {
 
+	fmt.Println("\n  ***** Iniciando mostrar informacion de SUPERBLOQUE *******")
+
 	fmt.Printf("\nFilesystemType: %d, Inodes_Count: %d, blocks_count: %d, free_blocks_count: %d, free_inodes_count: %d, "+
 		"bm_inode_start: %d, bm_block_start: %d, inode_start: %d, block_start: %d", data.S_filesystem_type, data.S_inodes_count,
 		data.S_blocks_count, int(data.S_free_blocks_count), int(data.S_free_inodes_count), data.S_bm_inode_start, data.S_bm_block_start, data.S_inode_start, data.S_block_start)
 	fmt.Println()
+
+	fmt.Println("\n  ***** Finalizando mostrar informacion de SUPERBLOQUE *******")
 
 }
 
@@ -154,7 +162,7 @@ type Fileblock struct { // bloque de archivos
 
 func printFileblock(data Fileblock) {
 
-	fmt.Println("\nusers.txt: ", string(data.B_content[:]))
+	fmt.Println("\nuser.txt: ", string(data.B_content[:]))
 
 }
 

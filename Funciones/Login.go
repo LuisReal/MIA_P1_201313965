@@ -8,24 +8,32 @@ import (
 	"strings"
 )
 
-func Login(user string, pass string, id string) (string, error) {
+func Login(user string, pass string, id string) error {
 	fmt.Println("\n\n========================= LOGIN ===========================")
 
-	fmt.Printf("\nUser: %s, pass: %s, id: %s\n", user, pass, id)
+	if user_.Nombre == user {
+		fmt.Println("\n\n ******* ERROR: El usuario ya esta logueado *******")
 
+		fmt.Println("\n\n========================= FIN LOGIN ===========================")
+		return nil
+	}
+
+	id = strings.ToUpper(id)
 	driveletter := string(id[0])
+
+	fmt.Printf("\nUser: %s, pass: %s, id: %s\n", user, pass, id)
 
 	// Open bin file
 	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
 	file, err := AbrirArchivo(filepath)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	var TempMBR MBR
 	// Read object from bin file
 	if err := LeerObjeto(file, &TempMBR, 0); err != nil {
-		return "", err
+		return err
 	}
 
 	// Print object
@@ -45,7 +53,7 @@ func Login(user string, pass string, id string) (string, error) {
 					index = i
 				} else {
 					fmt.Println("\n*******La particion NO esta montada*****")
-					return "", err
+					return nil
 				}
 				break
 			}
@@ -57,96 +65,159 @@ func Login(user string, pass string, id string) (string, error) {
 		fmt.Println()
 	} else {
 		fmt.Println("\n*****Particion NO encontrada******")
-		return "", err
+		return err
 	}
 
 	var tempSuperblock Superblock
 
 	if err := LeerObjeto(file, &tempSuperblock, int64(TempMBR.Mbr_partitions[index].Part_start)); err != nil {
-		return "", err
+		return err
 	}
 
-	// initSearch /users.txt -> regresa no Inodo
+	// initSearch /user.txt -> regresa no Inodo
 	// initSearch -> 1
 
-	indexInode := InitSearch("/users.txt", file, tempSuperblock) // devuelve el valor = 1 que se usara para encontrar el inodo 1
+	indexInode := InitSearch("/user.txt", file, tempSuperblock) // devuelve el valor = 1 que se usara para encontrar el inodo 1
 
 	fmt.Println("\nindexInode el valor que devuelve InitSearch: ", indexInode)
 
 	var crrInode Inode //Inodo 1
 
 	if err := LeerObjeto(file, &crrInode, int64(tempSuperblock.S_inode_start+indexInode*int32(binary.Size(Inode{})))); err != nil {
-		return "", err
+		return err
 	}
+
+	var bloque int
+	var indice int
+	var fileblock Fileblock
+	var cadena string
+	var fileblock_start int32
+
+	for i := 0; i < len(crrInode.I_block); i++ { //iterando bloques de inodo1
+
+		if crrInode.I_block[i] != -1 {
+
+			bloque = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
+			indice = i
+
+			fileblock_start = tempSuperblock.S_block_start + int32(bloque)*int32(binary.Size(Fileblock{}))
+
+			if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil { //bloque1
+				return err
+			}
+
+			cadena += string(fileblock.B_content[:])
+
+		}
+	}
+	fmt.Printf("\nel ultimo bloque creado es: %d, index: %d", bloque, indice)
+	fmt.Println()
 
 	// getInodeFileData -> Iterate the I_Block n concat the data
+	/*
+		var fileblock Fileblock
 
-	var fileblock Fileblock
+		fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{}))
 
-	fileblock_start := tempSuperblock.S_block_start + crrInode.I_block[0]*int32(binary.Size(Fileblock{}))
-
-	if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil {
-		return "", err
-	}
+		if err := LeerObjeto(file, &fileblock, int64(fileblock_start)); err != nil {
+			return err
+		}*/
 
 	fmt.Println("Fileblock------------")
 	//data := "1,G,root\n1,U,root,root,123\n"
-	data := string(fileblock.B_content[:])
+	fmt.Println("\n Imprimiendo cadena\n", cadena)
 
-	lines := strings.Split(data, "\n")
+	lines := strings.Split(cadena, "\n")
 
-	datos := strings.Split(lines[1], ",")
+	if len(lines) > 0 {
+		lines = lines[:len(lines)-1]
+	}
 
-	usuario := datos[3]
-	contrasena := datos[4]
+	var exist int
 
-	fmt.Println("Inode", crrInode.I_block)
+	for i := 0; i < len(lines); i++ {
+
+		datos := strings.Split(lines[i], ",")
+
+		t := strings.TrimSpace(datos[0]) // elimina espacios para poder ser leido correctamente
+
+		sv, _ := strconv.Atoi(string(t)) // contiene el numero de grupo
+
+		//fmt.Println("\nsv : ", sv)
+		user_id := sv
+
+		//fmt.Println("\nLongitud de datos es : ", len(datos))
+
+		if len(datos) > 3 {
+
+			if string(datos[3]) == user && datos[4] == pass {
+
+				user_.Nombre = datos[3]
+				user_.Id = id
+				user_.Status = true
+				user_.Gid, _ = SearchByUser(datos[2], crrInode, file, tempSuperblock)
+				user_.Uid = strconv.Itoa(user_id)
+
+				fmt.Println("\nUsuario: ", user_.Nombre, " ID Particion: ", user_.Id, " Group ID: ", user_.Gid, " User ID: ", user_.Uid)
+
+				fmt.Println("\n **********Usuario encontrado***********")
+
+				fmt.Println("\n\n========================= FIN LOGIN ===========================")
+
+				exist++
+
+			}
+		}
+
+	}
 
 	// Close bin file
-	defer file.Close()
 
-	if usuario == user && pass == contrasena {
-		fmt.Println("\n **********Usuario encontrado***********")
+	if exist == 0 {
 
-		fmt.Println("\n\n========================= FIN LOGIN ===========================")
-
-		return usuario, err
-	} else {
 		fmt.Println("\n*********Usuario NO encontrado**********")
 
 		fmt.Println("\n\n========================= FIN LOGIN ===========================")
 
-		return "failed", err
+		return nil
 	}
+
+	defer file.Close()
+
+	return nil
 
 }
 
 func Mkgrp(name string, id string) error {
 	fmt.Println("\n\n========================= Inicio MKGRP ===========================")
 
+	id = strings.ToUpper(id)
+
 	fmt.Printf("El grupo a crear sera: %s, El id es: %s", name, id)
 	fmt.Println()
 
 	//return file, fileblock, fileblock_start, nil
-	file, tempSuperblock, err := getUsersTXT(id)
+	file, tempSuperblock, superblock_start, err := getUsersTXT(id)
 
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	fmt.Println("\nSuperblock start: ", superblock_start)
+
+	indexInode := InitSearch("/user.txt", file, tempSuperblock)
 	//indexInode := int32(1) // para poder buscar el inodo1
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
-	var crrInode Inode //inodo que contiene los bloques de archivos de users.txt (Inodo 1)
+	var crrInode Inode //inodo que contiene los bloques de archivos de user.txt (Inodo 1)
 
 	if err := LeerObjeto(file, &crrInode, int64(inode_start)); err != nil { //Inode1
 		return err
 	}
 
 	var bloque int
-	var index int
+	//var index int
 	var fileblock Fileblock
 	var cadena string = " "
 	var fileblock_start int32
@@ -156,7 +227,7 @@ func Mkgrp(name string, id string) error {
 		if crrInode.I_block[i] != -1 {
 
 			bloque = int(crrInode.I_block[i]) //obtiene el numero del ultimo bloque de archivos creado
-			index = i
+			//index = i
 
 			fileblock_start = tempSuperblock.S_block_start + int32(bloque)*int32(binary.Size(Fileblock{}))
 
@@ -167,7 +238,7 @@ func Mkgrp(name string, id string) error {
 			cadena += string(fileblock.B_content[:])
 		}
 	}
-	fmt.Printf("\nel ultimo bloque creado es: %d, index: %d", bloque, index)
+	//fmt.Printf("\nel ultimo bloque creado es: %d, index: %d", bloque, index)
 	fmt.Println()
 
 	lines := strings.Split(cadena, "\n")
@@ -176,10 +247,10 @@ func Mkgrp(name string, id string) error {
 		lines = lines[:len(lines)-1]
 	}
 
-	fmt.Println("\n\nContenido del arreglo lines: ", lines)
-	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
+	//fmt.Println("\n\nContenido del arreglo lines: ", lines)
+	//fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
 
-	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
+	//fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
 	//2, G, usuarios, \n
 	var contador int = 0
 	var exist int = 0
@@ -212,7 +283,7 @@ func Mkgrp(name string, id string) error {
 
 		newCadena := strconv.Itoa(contador) + ",G," + name + "\n"
 
-		fmt.Println("\n ********datos de la variable newCadena: ", newCadena)
+		//fmt.Println("\n ********datos de la variable newCadena: ", newCadena)
 
 		var contador int
 
@@ -225,10 +296,13 @@ func Mkgrp(name string, id string) error {
 
 		if contador < len(newCadena) {
 			//fmt.Println("\nEl contador es: ", contador)
-			fmt.Println("\nYa no hay suficiente espacio en users.txt que esta en fileblock.B_content")
+			fmt.Println("\nYa no hay suficiente espacio en user.txt que esta en fileblock.B_content")
+
+			CreateNewBlockGroup(file, tempSuperblock, crrInode, name, superblock_start)
+
 			return nil
 		}
-		//Agregando nuevo grupo a users.txt en fileblock.B_content
+		//Agregando nuevo grupo a user.txt en fileblock.B_content
 		var c int
 
 		for i := 0; i < len(fileblock.B_content); i++ {
@@ -249,23 +323,19 @@ func Mkgrp(name string, id string) error {
 			}
 		}
 
-		fmt.Println("\n El contenido nuevo de B_content es: ", string(fileblock.B_content[:]))
+		//fmt.Println("\n El contenido nuevo de B_content es: ", string(fileblock.B_content[:]))
 
-		fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+		//fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
 		if err := EscribirObjeto(file, fileblock, int64(fileblock_start)); err != nil { //aqui solo escribi el primer EBR
 			return err
 		}
 
 	}
 
-	var tempfileblock Fileblock
-
-	fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
-	if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
+	//Escribiento Superbloque actualizado
+	if err := EscribirObjeto(file, tempSuperblock, int64(superblock_start)); err != nil { //aqui solo escribi el primer EBR
 		return err
 	}
-
-	printFileblock(tempfileblock)
 
 	//fmt.Println("\n\nLo que se guardo en fileblock.B_content es: ", string(fileblock.B_content[:]))
 
@@ -278,22 +348,26 @@ func Mkusr(user string, pass string, group string, id string) error {
 
 	fmt.Println("\n\n========================= Inicio MKUSR ===========================")
 
+	id = strings.ToUpper(id)
+
 	fmt.Printf("El usuario a crear sera: %s, El password es: %s, el grupo al que pertenecera es: %s, El id es: %s", user, pass, group, id)
 	fmt.Println()
 
 	//return file, fileblock, fileblock_start, nil
-	file, tempSuperblock, err := getUsersTXT(id)
+	file, tempSuperblock, superblock_start, err := getUsersTXT(id)
 
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	//fmt.Println("\nSuperblock start: ", superblock_start)
+
+	indexInode := InitSearch("/user.txt", file, tempSuperblock)
 	//indexInode := int32(1)
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
-	var crrInode Inode //inodo que contiene los bloques de archivos de users.txt
+	var crrInode Inode //inodo que contiene los bloques de archivos de user.txt
 
 	if err := LeerObjeto(file, &crrInode, int64(inode_start)); err != nil { //Inode1
 		return err
@@ -301,30 +375,13 @@ func Mkusr(user string, pass string, group string, id string) error {
 
 	//data := "1,G,root\n1,U,root,root,123\n"
 
-	CreateNewBlock(file, tempSuperblock, crrInode, user, group, pass)
-
-	/*
-		var tempfileblock Fileblock
-
-		fmt.Println("\n\n ********** Recuperando y Leyendo objeto FILEBLOCK del archivo binario ******************")
-		if err := LeerObjeto(file, &tempfileblock, int64(fileblock_start)); err != nil {
-			return err
-		}
-
-		printFileblock(tempfileblock)*/
+	CreateNewBlockUser(file, tempSuperblock, crrInode, user, group, pass, superblock_start)
 
 	fmt.Println("\n\n========================= Fin MKUSR ===========================")
 
 	return nil
 }
 
-//
-//
-//
-//
-//
-//
-//
 //
 
 func Rmgrp(name string, id string) error {
@@ -334,17 +391,19 @@ func Rmgrp(name string, id string) error {
 	fmt.Println()
 
 	//return file, fileblock, fileblock_start, nil
-	file, tempSuperblock, err := getUsersTXT(id)
+	file, tempSuperblock, superblock_start, err := getUsersTXT(id)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	fmt.Println("\nSuperblock start: ", superblock_start)
+
+	indexInode := InitSearch("/user.txt", file, tempSuperblock)
 	//indexInode := int32(1)
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
-	var crrInode Inode //inodo que contiene los bloques de archivos de users.txt
+	var crrInode Inode //inodo que contiene los bloques de archivos de user.txt
 
 	if err := LeerObjeto(file, &crrInode, int64(inode_start)); err != nil { //Inode1
 		return err
@@ -380,7 +439,7 @@ func Rmgrp(name string, id string) error {
 	fmt.Println("Fileblock------------")
 	//data := "1,G,root\n1,U,root,root,123\n"
 
-	fmt.Println("\n Imprimiendo cadena: ", cadena)
+	//fmt.Println("\n Imprimiendo cadena: ", cadena)
 
 	lines := strings.Split(cadena, "\n")
 
@@ -392,10 +451,10 @@ func Rmgrp(name string, id string) error {
 		}
 	}
 
-	fmt.Println("\n\nContenido del arreglo lines: ", lines)
-	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
+	//fmt.Println("\n\nContenido del arreglo lines: ", lines)
+	//fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
 
-	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
+	//fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
 	//2, G, usuarios, \n
 	var num_group int = 0
 	var exist int = 0
@@ -424,7 +483,7 @@ func Rmgrp(name string, id string) error {
 					datos[0] = "0"
 					lines[i] = strings.Join(datos, ",")
 
-					fmt.Println("\nImprimiendo la linea \n", lines)
+					//fmt.Println("\nImprimiendo la linea \n", lines)
 
 					exist++
 				}
@@ -435,7 +494,7 @@ func Rmgrp(name string, id string) error {
 
 	newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
 	newCadena += "\n"
-	fmt.Println("\nImprimiendo newCadena: ", newCadena)
+	//fmt.Println("\nImprimiendo newCadena: ", newCadena)
 
 	//Agregango newCadena con los grupos administradores(etc)removidos a los bloques de archivos
 
@@ -473,8 +532,8 @@ func Rmgrp(name string, id string) error {
 
 			}
 
-			fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-			fmt.Println("\n Imprimiendo tempfileblock.B_content que se escribira en el archivo binario\n", string(tempfileblock.B_content[:]))
+			//fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+			//fmt.Println("\n Imprimiendo tempfileblock.B_content que se escribira en el archivo binario\n", string(tempfileblock.B_content[:]))
 
 			if err := EscribirObjeto(file, tempfileblock, int64(fileblock_start1)); err != nil { //aqui solo escribi el primer EBR
 				return err
@@ -496,17 +555,19 @@ func Rmusr(user string, id string) error {
 	fmt.Println()
 
 	//return file, fileblock, fileblock_start, nil
-	file, tempSuperblock, err := getUsersTXT(id)
+	file, tempSuperblock, superblock_start, err := getUsersTXT(id)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	indexInode := InitSearch("/users.txt", file, tempSuperblock)
+	fmt.Println("\nSuperblock start: ", superblock_start)
+
+	indexInode := InitSearch("/user.txt", file, tempSuperblock)
 	//indexInode := int32(1)
 
 	inode_start := tempSuperblock.S_inode_start + indexInode*int32(binary.Size(Inode{})) //Inode 1
 
-	var crrInode Inode //inodo que contiene los bloques de archivos de users.txt
+	var crrInode Inode //inodo que contiene los bloques de archivos de user.txt
 
 	if err := LeerObjeto(file, &crrInode, int64(inode_start)); err != nil { //Inode1
 		return err
@@ -539,7 +600,7 @@ func Rmusr(user string, id string) error {
 	fmt.Println("Fileblock------------")
 	//data := "1,G,root\n1,U,root,root,123\n"
 
-	fmt.Println("\n Imprimiendo cadena de todos los bloques de archivos: ", cadena)
+	//fmt.Println("\n Imprimiendo cadena de todos los bloques de archivos: ", cadena)
 
 	lines := strings.Split(cadena, "\n")
 
@@ -551,10 +612,10 @@ func Rmusr(user string, id string) error {
 		}
 	}
 
-	fmt.Println("\n\nContenido del arreglo lines: ", lines)
-	fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
+	//fmt.Println("\n\nContenido del arreglo lines: ", lines)
+	//fmt.Println("\nEl tamano del arreglo lines es: ", len(lines))
 
-	fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
+	//fmt.Println("\nImprimiendo ultimo elemento de arreglo lines: ", lines[len(lines)-1])
 
 	//2, G, usuarios, \n
 	var num_group int = 0
@@ -575,19 +636,19 @@ func Rmusr(user string, id string) error {
 			if len(datos) > 3 {
 
 				if string(datos[3]) == user {
-					fmt.Println("\nEL usuario a eliminar si existe")
+					//fmt.Println("\nEL usuario a eliminar si existe")
 
 					if num_group == 0 {
 						fmt.Println("\n------------- El usuario no existe porque ya fue eliminado anteriormente ----------------")
 						fmt.Println("\n\n========================= Fin RMUSR ===========================")
 						return nil
 					} else {
-						fmt.Println("\n\n      ********** Eliminando usuario " + user + " ************")
+						//fmt.Println("\n\n      ********** Eliminando usuario " + user + " ************")
 
 						datos[0] = "0"
 						lines[i] = strings.Join(datos, ",")
 
-						fmt.Println("\nImprimiendo la linea: ", lines)
+						//fmt.Println("\nImprimiendo la linea: ", lines)
 
 						exist++
 
@@ -605,9 +666,9 @@ func Rmusr(user string, id string) error {
 		newCadena := strings.Join(lines, "\n") // convirtiendo slice lines a cadena de texto
 		newCadena += "\n"
 
-		fmt.Println("\nImprimiendo newCadena con el usuario ya eliminado: ", newCadena)
+		//fmt.Println("\nImprimiendo newCadena con el usuario ya eliminado: ", newCadena)
 
-		//Agregando newCadena con el usuario removido a los bloques de archivos de users.txt
+		//Agregando newCadena con el usuario removido a los bloques de archivos de user.txt
 
 		var tempfileblock Fileblock
 		var c int
@@ -643,8 +704,8 @@ func Rmusr(user string, id string) error {
 
 				}
 
-				fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
-				fmt.Println("\n Imprimiendo tempfileblock.B_content que se escribira en el archivo binario\n", string(tempfileblock.B_content[:]))
+				//fmt.Println("\n\n ********** Escribiendo objeto FILEBLOCK en el archivo ******************")
+				//fmt.Println("\n Imprimiendo tempfileblock.B_content que se escribira en el archivo binario\n", string(tempfileblock.B_content[:]))
 
 				if err := EscribirObjeto(file, tempfileblock, int64(fileblock_start1)); err != nil { //aqui solo escribi el primer EBR
 					return err
@@ -673,7 +734,7 @@ func Rmusr(user string, id string) error {
 	return nil
 }
 
-func getUsersTXT(id string) (*os.File, Superblock, error) {
+func getUsersTXT(id string) (*os.File, Superblock, int32, error) {
 
 	driveletter := string(id[0])
 
@@ -681,20 +742,20 @@ func getUsersTXT(id string) (*os.File, Superblock, error) {
 	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
 	file, err := AbrirArchivo(filepath)
 	if err != nil {
-		return nil, Superblock{}, err
+		return nil, Superblock{}, 0, err
 	}
 
 	var TempMBR MBR
 	// Read object from bin file
 	if err := LeerObjeto(file, &TempMBR, 0); err != nil {
-		return nil, Superblock{}, err
+		return nil, Superblock{}, 0, err
 	}
 
 	// Print object
-	fmt.Println("\n***********Imprimiendo MBR")
-	fmt.Println()
-	PrintMBR(TempMBR)
-	fmt.Println("\n********Finalizando Impresion de MBR")
+	//fmt.Println("\n***********Imprimiendo MBR")
+	//fmt.Println()
+	//PrintMBR(TempMBR)
+	//fmt.Println("\n********Finalizando Impresion de MBR")
 
 	var index int = -1
 	// Iterate over the partitions
@@ -707,7 +768,7 @@ func getUsersTXT(id string) (*os.File, Superblock, error) {
 					index = i
 				} else {
 					fmt.Println("\n*******La particion NO esta montada*****")
-					return nil, Superblock{}, err
+					return nil, Superblock{}, 0, err
 				}
 				break
 			}
@@ -715,25 +776,26 @@ func getUsersTXT(id string) (*os.File, Superblock, error) {
 	}
 
 	if index != -1 {
-		ImprimirParticion(TempMBR.Mbr_partitions[index])
+		//ImprimirParticion(TempMBR.Mbr_partitions[index])
 		fmt.Println()
 	} else {
 		fmt.Println("\n*****Particion NO encontrada******")
-		return nil, Superblock{}, err
+		return nil, Superblock{}, 0, err
 	}
 
 	var tempSuperblock Superblock
 
 	if err := LeerObjeto(file, &tempSuperblock, int64(TempMBR.Mbr_partitions[index].Part_start)); err != nil {
-		return nil, Superblock{}, err
+		return nil, Superblock{}, 0, err
 	}
 
-	// initSearch /users.txt -> regresa no Inodo
+	superblock_start := TempMBR.Mbr_partitions[index].Part_start
+	// initSearch /user.txt -> regresa no Inodo
 	// initSearch -> 1
 
 	// getInodeFileData -> Iterate the I_Block n concat the data
 
-	return file, tempSuperblock, nil
+	return file, tempSuperblock, superblock_start, nil
 
 }
 

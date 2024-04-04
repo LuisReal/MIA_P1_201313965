@@ -1,6 +1,7 @@
 package Funciones
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"os"
@@ -35,7 +36,7 @@ func AbrirArchivo(name string) (*os.File, error) {
 	file, err := os.OpenFile(name, os.O_RDWR, 0644)
 
 	if err != nil {
-		fmt.Println("el error es: ", err)
+		fmt.Println("\n **********El archivo no existe **********\n ", err)
 
 		return nil, err
 	}
@@ -46,14 +47,21 @@ func AbrirArchivo(name string) (*os.File, error) {
 func EscribirObjeto(file *os.File, disk interface{}, position int64) error {
 
 	file.Seek(position, 0)
-	//buf := bytes.NewBuffer([]byte{})
-	//wr := io.MultiWriter(buf, file)
+	var buffer bytes.Buffer
+	binary.Write(&buffer, binary.LittleEndian, disk)
+	file.Write(buffer.Bytes())
 
-	err := binary.Write(file, binary.LittleEndian, disk)
+	/*
+		file.Seek(position, 0)
+		//buf := bytes.NewBuffer([]byte{})
+		//wr := io.MultiWriter(buf, file)
 
-	if err != nil {
-		return err
-	}
+		//_, err = f.Write(make([]byte, 2*stride+stride/2))
+		err := binary.Write(file, binary.LittleEndian, disk)
+
+		if err != nil {
+			return err
+		}*/
 
 	return nil
 }

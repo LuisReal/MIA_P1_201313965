@@ -1,0 +1,456 @@
+digraph H {
+        label="Disco A";
+        fontsize="50"
+		graph [pad="0.5", nodesep="0.5", ranksep="1"];
+		node [shape=plaintext]
+		 rankdir=LR;Bloque0 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque0</td></tr><tr><td>.</td><td port='1'>0</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>user.txt</td><td port='3'>1</td></tr><tr><td>bin</td><td port='4'>2</td></tr></table>
+						>];	
+		
+			Bloque5 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque5</td></tr><tr><td>boot</td><td port='1'>3</td></tr><tr><td>cdrom</td><td port='2'>4</td></tr><tr><td>dev</td><td port='3'>5</td></tr><tr><td>etc</td><td port='4'>6</td></tr></table>
+						>];	
+		
+			Bloque10 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque10</td></tr><tr><td>home</td><td port='1'>7</td></tr><tr><td>lib</td><td port='2'>8</td></tr><tr><td>lib64</td><td port='3'>9</td></tr><tr><td>media</td><td port='4'>10</td></tr></table>
+						>];	
+		
+			Bloque15 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque15</td></tr><tr><td>mnt</td><td port='1'>11</td></tr><tr><td>opt</td><td port='2'>12</td></tr><tr><td>proc</td><td port='3'>13</td></tr><tr><td>run</td><td port='4'>14</td></tr></table>
+						>];	
+		
+			Bloque20 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque20</td></tr><tr><td>sbin</td><td port='1'>15</td></tr><tr><td>snap</td><td port='2'>16</td></tr><tr><td>srv</td><td port='3'>17</td></tr><tr><td>sys</td><td port='4'>18</td></tr></table>
+						>];	
+		
+			Bloque25 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque25</td></tr><tr><td>tmp</td><td port='1'>19</td></tr><tr><td>var</td><td port='2'>20</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque1 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque1</td></tr><tr><td port='2'>  1,G,root
+1,U,root,root,123
+2,G,usuarios
+3,G,adm
+0,G,mail
+4,G,n</td></tr></table>
+					>];
+			
+				Bloque2 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque2</td></tr><tr><td port='3'>ews
+5,G,sys
+2,U,root,usuario1,password
+3,U,usuarios,user1,abc
+0,</td></tr></table>
+					>];
+			
+				Bloque3 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque3</td></tr><tr><td port='4'>U,usuarios,user2,abc
+</td></tr></table>
+					>];
+			
+				Bloque4 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque4</td></tr><tr><td>.</td><td port='1'>2</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque6 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque6</td></tr><tr><td>.</td><td port='1'>3</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque7 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque7</td></tr><tr><td>.</td><td port='1'>4</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque8 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque8</td></tr><tr><td>.</td><td port='1'>5</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque9 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque9</td></tr><tr><td>.</td><td port='1'>6</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque11 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque11</td></tr><tr><td>.</td><td port='1'>7</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>archivos</td><td port='3'>21</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque12 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque12</td></tr><tr><td>.</td><td port='1'>8</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque13 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque13</td></tr><tr><td>.</td><td port='1'>9</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque14 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque14</td></tr><tr><td>.</td><td port='1'>10</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque16 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque16</td></tr><tr><td>.</td><td port='1'>11</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque17 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque17</td></tr><tr><td>.</td><td port='1'>12</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque18 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque18</td></tr><tr><td>.</td><td port='1'>13</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque19 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque19</td></tr><tr><td>.</td><td port='1'>14</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque21 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque21</td></tr><tr><td>.</td><td port='1'>15</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque22 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque22</td></tr><tr><td>.</td><td port='1'>16</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque23 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque23</td></tr><tr><td>.</td><td port='1'>17</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque24 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque24</td></tr><tr><td>.</td><td port='1'>18</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque26 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque26</td></tr><tr><td>.</td><td port='1'>19</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque27 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque27</td></tr><tr><td>.</td><td port='1'>20</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque28 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque28</td></tr><tr><td>.</td><td port='1'>21</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>archivos"19</td><td port='3'>22</td></tr><tr><td>user</td><td port='4'>23</td></tr></table>
+						>];	
+		
+			Bloque33 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque33</td></tr><tr><td>carpeta1</td><td port='1'>26</td></tr><tr><td></td><td port='2'>-1</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque29 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque29</td></tr><tr><td>.</td><td port='1'>22</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>no</td><td port='3'>34</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque30 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque30</td></tr><tr><td>.</td><td port='1'>23</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>docs</td><td port='3'>24</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque31 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque31</td></tr><tr><td>.</td><td port='1'>24</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>usac</td><td port='3'>25</td></tr><tr><td>Tarea.txt</td><td port='4'>31</td></tr></table>
+						>];	
+		
+			Bloque41 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque41</td></tr><tr><td>.</td><td port='1'>24</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>Tarea2.txt</td><td port='3'>32</td></tr><tr><td>Tarea3.txt</td><td port='4'>33</td></tr></table>
+						>];	
+		
+			Bloque32 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque32</td></tr><tr><td>.</td><td port='1'>25</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque34 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque34</td></tr><tr><td>.</td><td port='1'>26</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>carpeta2</td><td port='3'>27</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque35 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque35</td></tr><tr><td>.</td><td port='1'>27</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>carpeta3</td><td port='3'>28</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque36 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque36</td></tr><tr><td>.</td><td port='1'>28</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>carpeta4</td><td port='3'>29</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque37 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque37</td></tr><tr><td>.</td><td port='1'>29</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>carpeta5</td><td port='3'>30</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque38 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque38</td></tr><tr><td>.</td><td port='1'>30</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque39 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque39</td></tr><tr><td port='40'>0123456789012345678901234567890123456789012345678901234567890123</td></tr></table>
+					>];
+			
+				Bloque40 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque40</td></tr><tr><td port='41'>45678901234</td></tr></table>
+					>];
+			
+				Bloque42 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque42</td></tr><tr><td port='43'>0123456789012345678901234567890123456789012345678901234567890123</td></tr></table>
+					>];
+			
+				Bloque43 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque43</td></tr><tr><td port='44'>4567890123456789012345678901234567890123456789012345678901234567</td></tr></table>
+					>];
+			
+				Bloque44 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque44</td></tr><tr><td port='45'>8901234567890123456789012345678901234567890123456789012345678901</td></tr></table>
+					>];
+			
+				Bloque45 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque45</td></tr><tr><td port='46'>2345678901234567890123456789012345678901234567890123456789012345</td></tr></table>
+					>];
+			
+				Bloque46 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque46</td></tr><tr><td port='47'>6789012345678901234567890123456789012345678901234567890123456789</td></tr></table>
+					>];
+			
+				Bloque47 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque47</td></tr><tr><td port='48'>0123456789012345678901234567890123456789012345678901234567890123</td></tr></table>
+					>];
+			
+				Bloque48 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque48</td></tr><tr><td port='49'>4567890123456789012345678901234567890123456789012345678901234567</td></tr></table>
+					>];
+			
+				Bloque49 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque49</td></tr><tr><td port='50'>8901234567890123456789012345678901234567890123456789012345678901</td></tr></table>
+					>];
+			
+				Bloque50 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque50</td></tr><tr><td port='51'>2345678901234567890123456789012345678901234567890123456789012345</td></tr></table>
+					>];
+			
+				Bloque51 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque51</td></tr><tr><td port='52'>6789012345678901234567890123456789012345678901234567890123456789</td></tr></table>
+					>];
+			
+				Bloque52 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque52</td></tr><tr><td port='53'>0123456789012345678901234567890123456789012345678901234567890123</td></tr></table>
+					>];
+			
+				Bloque53 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque53</td></tr><tr><td port='54'>4567890123456789012345678901234567890123456789012345678901234567</td></tr></table>
+					>];
+			
+				Bloque54 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque54</td></tr><tr><td port='55'>Este es el curso de Manejo e implementacion de archivos de la ca</td></tr></table>
+					>];
+			
+				Bloque55 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque55</td></tr><tr><td port='56'>rrera de ingenieria en ciencias y sistemas de la universidad de </td></tr></table>
+					>];
+			
+				Bloque56 [
+						label=<
+						<table  border="0" cellborder="1" cellspacing="0">
+						<tr><td colspan="3" port='0'>Bloque56</td></tr><tr><td port='57'>San Carlos de Guatemala</td></tr></table>
+					>];
+			
+				Bloque57 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque57</td></tr><tr><td>.</td><td port='1'>34</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>tiene</td><td port='3'>35</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque58 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque58</td></tr><tr><td>.</td><td port='1'>35</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>que</td><td port='3'>36</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque59 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque59</td></tr><tr><td>.</td><td port='1'>36</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>hacerla</td><td port='3'>37</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque60 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque60</td></tr><tr><td>.</td><td port='1'>37</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>por</td><td port='3'>38</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque61 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque61</td></tr><tr><td>.</td><td port='1'>38</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td>permisos</td><td port='3'>39</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque62 [
+					label=<
+					<table  border="0" cellborder="1" cellspacing="0">
+					<tr><td colspan="3" port='0'>Bloque62</td></tr><tr><td>.</td><td port='1'>39</td></tr><tr><td>..</td><td port='2'>0</td></tr><tr><td></td><td port='3'>-1</td></tr><tr><td></td><td port='4'>-1</td></tr></table>
+						>];	
+		
+			Bloque0:0:e->Bloque1:0:w
+Bloque1:0:e->Bloque2:0:w
+Bloque2:0:e->Bloque3:0:w
+Bloque3:0:e->Bloque4:0:w
+Bloque4:0:e->Bloque5:0:w
+Bloque5:0:e->Bloque6:0:w
+Bloque6:0:e->Bloque7:0:w
+Bloque7:0:e->Bloque8:0:w
+Bloque8:0:e->Bloque9:0:w
+Bloque9:0:e->Bloque10:0:w
+Bloque10:0:e->Bloque11:0:w
+Bloque11:0:e->Bloque12:0:w
+Bloque12:0:e->Bloque13:0:w
+Bloque13:0:e->Bloque14:0:w
+Bloque14:0:e->Bloque15:0:w
+Bloque15:0:e->Bloque16:0:w
+Bloque16:0:e->Bloque17:0:w
+Bloque17:0:e->Bloque18:0:w
+Bloque18:0:e->Bloque19:0:w
+Bloque19:0:e->Bloque20:0:w
+Bloque20:0:e->Bloque21:0:w
+Bloque21:0:e->Bloque22:0:w
+Bloque22:0:e->Bloque23:0:w
+Bloque23:0:e->Bloque24:0:w
+Bloque24:0:e->Bloque25:0:w
+Bloque25:0:e->Bloque26:0:w
+Bloque26:0:e->Bloque27:0:w
+Bloque27:0:e->Bloque28:0:w
+Bloque28:0:e->Bloque29:0:w
+Bloque29:0:e->Bloque30:0:w
+Bloque30:0:e->Bloque31:0:w
+Bloque31:0:e->Bloque32:0:w
+Bloque32:0:e->Bloque33:0:w
+Bloque33:0:e->Bloque34:0:w
+Bloque34:0:e->Bloque35:0:w
+Bloque35:0:e->Bloque36:0:w
+Bloque36:0:e->Bloque37:0:w
+Bloque37:0:e->Bloque38:0:w
+Bloque38:0:e->Bloque39:0:w
+Bloque39:0:e->Bloque40:0:w
+Bloque40:0:e->Bloque41:0:w
+Bloque41:0:e->Bloque42:0:w
+Bloque42:0:e->Bloque43:0:w
+Bloque43:0:e->Bloque44:0:w
+Bloque44:0:e->Bloque45:0:w
+Bloque45:0:e->Bloque46:0:w
+Bloque46:0:e->Bloque47:0:w
+Bloque47:0:e->Bloque48:0:w
+Bloque48:0:e->Bloque49:0:w
+Bloque49:0:e->Bloque50:0:w
+Bloque50:0:e->Bloque51:0:w
+Bloque51:0:e->Bloque52:0:w
+Bloque52:0:e->Bloque53:0:w
+Bloque53:0:e->Bloque54:0:w
+Bloque54:0:e->Bloque55:0:w
+Bloque55:0:e->Bloque56:0:w
+Bloque56:0:e->Bloque57:0:w
+Bloque57:0:e->Bloque58:0:w
+Bloque58:0:e->Bloque59:0:w
+Bloque59:0:e->Bloque60:0:w
+Bloque60:0:e->Bloque61:0:w
+Bloque61:0:e->Bloque62:0:w
+}

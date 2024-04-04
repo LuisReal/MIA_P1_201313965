@@ -8,13 +8,16 @@ import (
 )
 
 func Mkfs(id string, type_ string, fs_ string) {
+
+	id = strings.ToUpper(id)
+
 	fmt.Println("\n\n=========================Iniciando MKFS===========================")
 	fmt.Println()
 
 	driveletter := string(id[0])
 
 	// Open bin file
-	filepath := "./archivos/" + strings.ToUpper(driveletter) + ".dsk"
+	filepath := "./archivos/" + driveletter + ".dsk"
 	file, err := AbrirArchivo(filepath)
 	if err != nil {
 		return
@@ -56,6 +59,7 @@ func Mkfs(id string, type_ string, fs_ string) {
 
 	numerador := int32(TempMBR.Mbr_partitions[index].Part_size - int32(binary.Size(Superblock{})))
 	denominador_base := int32(4 + int32(binary.Size(Inode{})) + 3*int32(binary.Size(Fileblock{})))
+
 	var temp int32 = 0
 	if fs_ == "2fs" {
 		temp = 0
@@ -108,6 +112,8 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	newSuperblock.S_bm_block_start = newSuperblock.S_bm_inode_start + n
 	newSuperblock.S_inode_start = newSuperblock.S_bm_block_start + 3*n
 	newSuperblock.S_block_start = newSuperblock.S_inode_start + n*int32(binary.Size(Inode{})) // n = numero de inodos
+	newSuperblock.S_inode_size = int32(binary.Size(Inode{}))
+	newSuperblock.S_block_size = int32(binary.Size(Folderblock{}))
 
 	// se resta dos veces -1 porque hay que crear dos inodos y dos bloques
 	newSuperblock.S_free_inodes_count -= 1
@@ -160,7 +166,7 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	var Inode0 Inode //Inode 0
 	Inode0.I_uid = 1
 	Inode0.I_gid = 1
-	Inode0.I_size = 0
+	Inode0.I_size = int32(binary.Size(Folderblock{}))
 
 	// carpeta -> 0   archivo ->1
 	copy(Inode0.I_type[:], "0")
@@ -175,23 +181,28 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// . | 0
 	// .. | 0
-	// users.txt | 1
+	// user.txt | 1
 	//
 
 	var Folderblock0 Folderblock //Bloque 0 -> carpetas
+
+	for i := int32(0); i < 4; i++ {
+		Folderblock0.B_content[i].B_inodo = -1
+	}
+
 	Folderblock0.B_content[0].B_inodo = 0
 	copy(Folderblock0.B_content[0].B_name[:], ".")
 	Folderblock0.B_content[1].B_inodo = 0
 	copy(Folderblock0.B_content[1].B_name[:], "..")
 	Folderblock0.B_content[2].B_inodo = 1
-	copy(Folderblock0.B_content[2].B_name[:], "users.txt")
+	copy(Folderblock0.B_content[2].B_name[:], "user.txt")
 
 	//creando el Inode 1
 
 	var Inode1 Inode //Inode 1
 	Inode1.I_uid = 1
 	Inode1.I_gid = 1
-	Inode1.I_size = int32(binary.Size(Folderblock{}))
+	Inode1.I_size = int32(binary.Size(Fileblock{}))
 	copy(Inode1.I_type[:], "1") // es de tipo archivo
 	copy(Inode1.I_perm[:], "664")
 
@@ -208,13 +219,11 @@ func ext2(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	var Fileblock1 Fileblock //Bloque 1 -> archivo
 
-	var data_bytes [64]byte
-	copy(data_bytes[:], []byte(data))
-	Fileblock1.B_content = data_bytes
+	copy(Fileblock1.B_content[:], []byte(data))
 
 	// Inodo 0 -> Bloque 0 -> Inodo 1 -> Bloque 1
 	// Crear la carpeta raiz /
-	// Crear el archivo users.txt "1,G,root\n1,U,root,root,123\n"
+	// Crear el archivo user.txt "1,G,root\n1,U,root,root,123\n"
 
 	// escribiendo el superblock
 	err := EscribirObjeto(file, newSuperblock, int64(partition.Part_start))
@@ -294,16 +303,19 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	//escribiendo el journaling
 	var journaling Journaling
-	var operacion [10]byte
-	var path [100]byte
-	var content [100]byte
 
-	copy(operacion[:], "mkdir")
-	copy(path[:], "/")
-	copy(content[:], "Mi nombre es Luis Gonzalez")
-	journaling.Contenido[0].Operation = operacion
-	journaling.Contenido[0].Path = path
-	journaling.Contenido[0].Content = content
+	/*
+		var operacion [10]byte
+		var path [100]byte
+		var content [100]byte
+
+
+		copy(operacion[:], "mkdir")
+		copy(path[:], "/")
+		copy(content[:], "Mi nombre es Luis Gonzalez")
+		journaling.Contenido[0].Operation = operacion
+		journaling.Contenido[0].Path = path
+		journaling.Contenido[0].Content = content*/
 
 	error_ := EscribirObjeto(file, journaling, int64(partition.Part_start+int32(binary.Size(Superblock{}))))
 
@@ -356,7 +368,9 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 	var Inode0 Inode //Inode 0
 	Inode0.I_uid = 1
 	Inode0.I_gid = 1
-	Inode0.I_size = 0
+	Inode0.I_size = int32(binary.Size(Folderblock{}))
+
+	copy(Inode0.I_type[:], "0") // es de tipo carpeta
 	copy(Inode0.I_perm[:], "664")
 
 	for i := int32(0); i < 15; i++ {
@@ -367,24 +381,30 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// . | 0
 	// .. | 0
-	// users.txt | 1
+	// user.txt | 1
 	//
 
 	var Folderblock0 Folderblock //Bloque 0 -> carpetas
+
+	for i := int32(0); i < 4; i++ {
+		Folderblock0.B_content[i].B_inodo = -1
+	}
+
 	Folderblock0.B_content[0].B_inodo = 0
 	copy(Folderblock0.B_content[0].B_name[:], ".")
 	Folderblock0.B_content[1].B_inodo = 0
 	copy(Folderblock0.B_content[1].B_name[:], "..")
 	Folderblock0.B_content[2].B_inodo = 1
-	copy(Folderblock0.B_content[2].B_name[:], "users.txt")
+	copy(Folderblock0.B_content[2].B_name[:], "user.txt")
 
 	//creando el Inode 1
 
 	var Inode1 Inode //Inode 1
 	Inode1.I_uid = 1
 	Inode1.I_gid = 1
-	Inode1.I_size = int32(binary.Size(Folderblock{}))
+	Inode1.I_size = int32(binary.Size(Fileblock{}))
 
+	copy(Inode1.I_type[:], "1") // es de tipo archivo
 	copy(Inode1.I_perm[:], "664")
 
 	for i := int32(0); i < 15; i++ {
@@ -399,7 +419,7 @@ func ext3(n int32, partition Partition, newSuperblock Superblock, file *os.File)
 
 	// Inodo 0 -> Bloque 0 -> Inodo 1 -> Bloque 1
 	// Crear la carpeta raiz /
-	// Crear el archivo users.txt "1,G,root\n1,U,root,root,123\n"
+	// Crear el archivo user.txt "1,G,root\n1,U,root,root,123\n"
 
 	// escribiendo el superblock
 	err := EscribirObjeto(file, newSuperblock, int64(partition.Part_start))
